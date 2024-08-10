@@ -1,16 +1,14 @@
-# all_life_app
+# 프론트
+앱의 아이콘의 크기별로 깨지지 않게 하기 위해서는 아래 사이트에서 각 상황에 맞게 변환후 사용할것
+https://www.appicon.co/
 
-K-hackton
+## 폴더 기본적인 구조 설명
+```
+..불필요한 파일 제외
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+lib
+├── main.dart -> 앱의 핵심 구조가 들어가 있는곳 
+├── page -> 페이지를 구현하는 Dart 파일을 저장하는 폴더 
+│   └── home.dart -> 테스트 용도로 만들어짐 
+└── widgets -> 페이지에 들어가는 버튼이나 레이아웃의 기본적인 틀을 설정하고 저장하는 폴더 
+```
