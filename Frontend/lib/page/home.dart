@@ -279,7 +279,7 @@ class _HomePageState extends State<HomePage> {
               ),
               // 하단 메뉴 부분
               Container(
-                height: 90,
+                height: 80,
                 decoration: BoxDecoration(
                   boxShadow: [
                     BoxShadow(
