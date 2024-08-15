@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -73,6 +74,37 @@ class _HomePageState extends State<HomePage> {
                     child: SingleChildScrollView( // Make the content scrollable
                       child: Column(
                         children: [
+                          Container(
+                            width: double.infinity,
+                            margin: EdgeInsets.only(bottom: 2),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(padding: EdgeInsets.all(5),
+                                    child:  Container(
+                                      width: double.infinity,
+                                      height: 50,
+                                      decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(20),
+                                          color: Color(0xffF0DB4A)
+                                      ),
+                                      child:Center(
+                                        child:
+                                          Padding(
+                                              padding: EdgeInsets.fromLTRB(15, 0, 0, 0),
+                                              child: Row(
+                                                children: [
+                                                  Icon(Icons.warning),
+                                                  Text(" 전국적 폭염에 따른 개인별 수착 안내사항(강조)")
+                                                ],
+                                              )
+                                          )
+                                      )
+                                    ),
+                                )
+                              ],
+                            ),
+                          ),
                           // 가벼운 인사말 정도로?
                           Container(
                             width: double.infinity,
@@ -118,7 +150,7 @@ class _HomePageState extends State<HomePage> {
                           // 현재 지역에 있는 해일 대피 시설 안내
                           Container(
                             width: double.infinity,
-                            margin: EdgeInsets.only(top: 5),
+                            margin: EdgeInsets.only(top: 10),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -180,34 +212,53 @@ class _HomePageState extends State<HomePage> {
                                     children: [
                                       Container(
                                         padding: EdgeInsets.only(left: 8.0),
-                                        width: MediaQuery.of(context).size.width * 0.23,
-                                        child: FloatingActionButton(
-                                          onPressed: () {},
-                                          child: Text("태풍"),
+                                        width: MediaQuery.of(context).size.width * 0.3,
+                                        child: TextButton(
+                                          onPressed: () {
+                                            launchUrl(
+                                              Uri.parse("https://www.korea.kr/multi/visualNewsView.do?newsId=148930976&pwise=mMain&pWiseMain=G4_2#visualNews")
+                                            );
+                                          },
+                                          child:const Row(
+                                            children: [
+                                              Icon(Icons.tornado),
+                                              Text("태풍/호우")
+                                            ],
+                                          ) ,
+                                        ),
+                                      ),
+                                      Container(
+                                        padding: EdgeInsets.only(left: 8.0),
+                                        width: MediaQuery.of(context).size.width * 0.3,
+                                        child: TextButton(
+                                          onPressed: () {
+                                            launchUrl(
+                                              Uri.parse('https://www.mois.go.kr/cmm/fms/getImage.do?atchFileId=FILE_00127937QRD4_FS&fileSn=0&preView=ok'),
+                                            );
+                                          },
+                                          child:const Row(
+                                            children: [
+                                              Icon(Icons.draw),
+                                              Text("지진/해일")
+                                            ],
+                                          ) ,
                                         ),
                                       ),
                                       Container(
                                         padding: EdgeInsets.only(left: 8.0),
                                         width: MediaQuery.of(context).size.width * 0.23,
-                                        child: FloatingActionButton(
-                                          onPressed: () {},
-                                          child: Text("지진"),
-                                        ),
-                                      ),
-                                      Container(
-                                        padding: EdgeInsets.only(left: 8.0),
-                                        width: MediaQuery.of(context).size.width * 0.23,
-                                        child: FloatingActionButton(
-                                          onPressed: () {},
-                                          child: Text("해일"),
-                                        ),
-                                      ),
-                                      Container(
-                                        padding: EdgeInsets.only(left: 8.0),
-                                        width: MediaQuery.of(context).size.width * 0.23,
-                                        child: FloatingActionButton(
-                                          onPressed: () {},
-                                          child: Text("화재"),
+                                        child: TextButton(
+                                          onPressed: () {
+                                            launchUrl(
+                                              Uri.parse('https://opengov.seoul.go.kr/mediahub/22105241'),
+                                            );
+                                          },
+                                         child:const Row(
+                                           children: [
+                                             Icon(Icons.local_fire_department),
+                                             Text("화재")
+                                           ],
+                                         ) ,
                                         ),
                                       ),
                                     ],

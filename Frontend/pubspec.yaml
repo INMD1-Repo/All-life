@@ -36,11 +36,9 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   go_router: ^9.0.0
-<<<<<<< HEAD
   carousel_slider: ^5.0.0
-=======
   geolocator: ^8.2.1
->>>>>>> 5fd16167aa4254abfc9e8f3b791ee3478abdae7c
+  url_launcher: ^6.3.0
 
 dev_dependencies:
   flutter_test:
