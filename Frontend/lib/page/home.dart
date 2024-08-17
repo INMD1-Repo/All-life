@@ -1,22 +1,53 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
-
   @override
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
-  // 현재 선택된 버튼을 추적하는 변수
-  int _selectedIndex = 0;
+class _HomePageState extends State<HomePage>  with WidgetsBindingObserver{
+  String? test = "NULL";
 
-  // 버튼을 클릭했을 때 호출되는 메서드
-  void _onButtonPressed(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+  @override
+  void initState() {
+    super.initState();
+    _loadLocation();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  //메모리 누수 방지
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async{
+    // TODO: implement didChangeAppLifecycleState
+    super.didChangeAppLifecycleState(state);
+    if(state == AppLifecycleState.resumed){
+      _loadLocation();
+    }
+  }
+
+  Future<void> _loadLocation() async {
+    test = await locationko();
+    Map<String, dynamic> jsonData = jsonDecode(test!);
+    test = jsonData['address']['road'];
+    setState(() {});
+  }
+
+  Future<String?> locationko() async{
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    final String? locationjson = sp.getString("locationjson");
+    return locationjson;
   }
 
   @override
@@ -74,6 +105,7 @@ class _HomePageState extends State<HomePage> {
                     child: SingleChildScrollView( // Make the content scrollable
                       child: Column(
                         children: [
+                          //폭염 주위하자
                           Container(
                             width: double.infinity,
                             margin: EdgeInsets.only(bottom: 2),
@@ -116,7 +148,7 @@ class _HomePageState extends State<HomePage> {
                                   style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                                 ),
                                 Text(
-                                  "현재 있는 위치는 XXX동입니다.",
+                                  '현재 있는 위치는 $test 입니다.',
                                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                                 ),
                               ],
@@ -294,10 +326,10 @@ class _HomePageState extends State<HomePage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    _buildButton(0, Icons.home, "홈"),
-                    _buildButton(1, Icons.place, "지도 보기"),
-                    _buildButton(2, Icons.settings, "설정"),
-                    _buildButton(3, Icons.account_circle, "계정"),
+                    _buildButton(0, Icons.home, "홈", true, '/'),
+                    _buildButton(1, Icons.place, "지도 보기", false, '/map'),
+                    _buildButton(2, Icons.settings, "설정", false, '/'),
+                    _buildButton(3, Icons.account_circle, "계정", false, '/'),
                   ],
                 ),
               ),
@@ -309,11 +341,11 @@ class _HomePageState extends State<HomePage> {
   }
 
   // 버튼을 생성하는 메서드
-  Widget _buildButton(int index, IconData icon, String label) {
+  Widget _buildButton(int index, IconData icon, String label, bool change, String Page) {
     return Padding(
       padding: EdgeInsets.only(top: 10), // 여백 조정
       child: TextButton(
-        onPressed: () => _onButtonPressed(index),
+        onPressed: () => context.go(Page),
         style: TextButton.styleFrom(
           overlayColor: Colors.transparent, // 눌림 효과 제거
         ),
@@ -322,12 +354,12 @@ class _HomePageState extends State<HomePage> {
           children: [
             Icon(
               icon,
-              color: _selectedIndex == index ? Colors.blue : Colors.black,
+              color: change == true ? Colors.blue : Colors.black,
             ),
             Text(
               label,
               style: TextStyle(
-                color: _selectedIndex == index ? Colors.blue : Colors.black,
+                color: change == true ? Colors.blue : Colors.black,
               ),
             ),
           ],
@@ -336,3 +368,4 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
+
