@@ -1,9 +1,9 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -12,8 +12,9 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage>  with WidgetsBindingObserver{
-  String? test = "NULL";
-
+  String? test;
+  String? earthquake;
+  String? tsunami;
   @override
   void initState() {
     super.initState();
@@ -38,16 +39,27 @@ class _HomePageState extends State<HomePage>  with WidgetsBindingObserver{
   }
 
   Future<void> _loadLocation() async {
-    test = await locationko();
-    Map<String, dynamic> jsonData = jsonDecode(test!);
-    test = jsonData['address']['road'];
-    setState(() {});
-  }
-
-  Future<String?> locationko() async{
     SharedPreferences sp = await SharedPreferences.getInstance();
-    final String? locationjson = sp.getString("locationjson");
-    return locationjson;
+    String? data = await sp.getString("locationjson");
+    String city = jsonDecode(data!)["results"][0]["region"]["area2"]["name"].toString();
+    String dong = jsonDecode(data!)["results"][0]["region"]["area3"]["name"].toString();
+
+    //자체제작한 API에서 가지고 대피소 정보를 가지고옴
+    final Url = Uri.parse("http://hackton.powerinmd.com/earthquake_shelter?city=$city&dong=$dong");
+    final req = await http.get(Url);
+    earthquake = req.body;
+    sp.setString("earthquake_json", req.body);
+
+    //자체제작한 API에서 가지고 대피소 정보를 가지고옴
+    final Url_s = Uri.parse("http://hackton.powerinmd.com/tsunami_shelter?city=$city&dong=$dong");
+    final req_s = await http.get(Url_s);
+    tsunami = req_s.body;
+    sp.setString("earthquake_json", req_s.body);
+
+    _list_card();
+    setState(() {
+      test = city+" "+dong;
+    });
   }
 
   @override
@@ -90,7 +102,6 @@ class _HomePageState extends State<HomePage>  with WidgetsBindingObserver{
                         style: TextStyle(color: Colors.black, fontSize: 16.0),
                       ),
                       CircleAvatar(
-
                       ),
                     ],
                   ),
@@ -112,26 +123,53 @@ class _HomePageState extends State<HomePage>  with WidgetsBindingObserver{
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                //공지사항인데 필요없는 기능이라고 생각하면 지워도됨
                                 Padding(padding: EdgeInsets.all(5),
-                                    child:  Container(
-                                      width: double.infinity,
-                                      height: 50,
-                                      decoration: BoxDecoration(
+                                    child:InkWell(
+                                      onTap: () {
+                                        // 버튼 클릭 시 실행할 코드
+                                        showDialog(
+                                            context: context,
+                                            builder: (context) {
+                                              return Dialog(
+                                                child: Container(
+                                                  width: MediaQuery.of(context).size.width * 0.9,
+                                                  height: MediaQuery.of(context)
+                                                        .size
+                                                        .height *
+                                                    0.6,
+                                                  alignment: Alignment.center,
+                                                  child: Column(
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    children: [
+                                                     Image.asset("assets/summer.jpg", fit:BoxFit.cover, height: MediaQuery.of(context).size.height * 0.5, )
+                                                    ],
+                                                  ),
+                                                ),
+                                              );
+                                            }
+                                        );
+                                      },
+                                      child: Container(
+                                        width: double.infinity,
+                                        height: 50,
+                                        decoration: BoxDecoration(
                                           borderRadius: BorderRadius.circular(20),
-                                          color: Color(0xffF0DB4A)
+                                          color: Color(0xffF0DB4A),
+                                        ),
+                                        child: Center(
+                                          child: Padding(
+                                            padding: EdgeInsets.fromLTRB(20, 0, 0, 0),
+                                            child: Row(
+                                              children: [
+                                                Icon(Icons.warning),
+                                                SizedBox(width: 8), // 아이콘과 텍스트 사이에 간격 추가
+                                                Text("전국적 폭염에 따른 개인별 수착 안내사항(강조)"),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
                                       ),
-                                      child:Center(
-                                        child:
-                                          Padding(
-                                              padding: EdgeInsets.fromLTRB(15, 0, 0, 0),
-                                              child: Row(
-                                                children: [
-                                                  Icon(Icons.warning),
-                                                  Text(" 전국적 폭염에 따른 개인별 수착 안내사항(강조)")
-                                                ],
-                                              )
-                                          )
-                                      )
                                     ),
                                 )
                               ],
@@ -161,20 +199,15 @@ class _HomePageState extends State<HomePage>  with WidgetsBindingObserver{
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text("지진 대피 시설",style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),),
-                                Padding(padding: EdgeInsets.all(20),
-                                    child:  Container(
-
-                                      width: double.infinity,
-                                      height: 100,
-                                      decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(20),
-                                          color: Color(0xfff6f6f6)
-                                      ),
-                                      child: Center(
-                                        child: Text("서비스 준비중입니다."),
-                                      ),
-                                    )
+                                Padding(padding: EdgeInsets.fromLTRB(0, 0, 0, 10),
+                                child: Text("지진 대피 시설",style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),)
+                                ), SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: Row(
+                                    children: [
+                                      _list_card()
+                                    ],
+                                  ),
                                 )
                               ],
                             ),
@@ -187,16 +220,13 @@ class _HomePageState extends State<HomePage>  with WidgetsBindingObserver{
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text("해일 대피 시설",style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),),
-                                Padding(padding: EdgeInsets.all(20),
-                                    child:  Container(
-                                      width: double.infinity,
-                                      height: 100,
-                                      decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(20),
-                                          color: Color(0xfff6f6f6)
-                                      ),
-                                      child: Center(
-                                        child: Text("서비스 준비중입니다."),
+                                Padding(padding: EdgeInsets.all(0),
+                                    child: SingleChildScrollView(
+                                      scrollDirection: Axis.horizontal,
+                                      child: Row(
+                                        children: [
+                                          _list_sea_card()
+                                        ],
                                       ),
                                     )
                                   )
@@ -367,5 +397,127 @@ class _HomePageState extends State<HomePage>  with WidgetsBindingObserver{
       ),
     );
   }
+
+  //리스트 만들어주는 메서드 지진대피시설
+  _list_card(){
+    Row row = Row(children: []);
+    try{
+      var json = jsonDecode(earthquake!);
+      if(json.length == 0 || json.length! == null){
+        row.children.add(
+            Container(
+              width: 400,
+              height: 100,
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  color: Color(0xfff6f6f6)
+              ),
+              child: Center(
+                child: Text("조회된 내용이 없습니다."),
+              ),
+            )
+        );
+        return row;
+      }
+      for(int i = 0; i < json.length; i++){
+        
+        row.children.add(
+            Container(
+              width: 300,
+              height: 140,
+              child:Card(
+                  clipBehavior: Clip.antiAlias,
+                  child: Column(
+                    children: [
+                      Image.network('https://picsum.photos/250?image=9',fit: BoxFit.cover,width: double.infinity,height:60),
+                      ListTile(
+                        title: Text(json[i]["vt_acmdfclty_nm"].toString(), style: TextStyle(fontWeight: FontWeight.bold)),
+                        subtitle: Text(json[i]["dtl_adres"].toString()),
+                      )
+                    ],
+                  )
+              ),
+            )
+        );
+      }
+      return row;
+    }catch(error){
+      row.children.add(
+          Container(
+            width: 400,
+            height: 100,
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                color: Color(0xfff6f6f6)
+            ),
+            child: Center(
+              child: Text("서비스를 지원하지 않는 지역입니다.."),
+            ),
+          )
+      );
+      return row;
+    }
+  }
+  //리스트 만들어주는 메서드 해일대피시설
+  _list_sea_card(){
+    Row row = Row(children: []);
+    try{
+     var json = jsonDecode(tsunami!);
+     if(json.length == 0 || json.length! == null){
+       row.children.add(
+           Container(
+             width: 400,
+             height: 100,
+             decoration: BoxDecoration(
+                 borderRadius: BorderRadius.circular(20),
+                 color: Color(0xfff6f6f6)
+             ),
+             child: Center(
+               child: Text("조회된 내용이 없습니다."),
+             ),
+           )
+       );
+       return row;
+     }
+     for(int i = 0; i < json.length; i++){
+         row.children.add(
+             Container(
+               width: 300,
+               height: 140,
+               child:Card(
+                   clipBehavior: Clip.antiAlias,
+                   child: Column(
+                     children: [
+                       Image.network('https://picsum.photos/250?image=9',fit: BoxFit.cover,width: double.infinity,height:60),
+                       ListTile(
+                         title: Text(json[i]["vt_acmdfclty_nm"].toString(), style: TextStyle(fontWeight: FontWeight.bold)),
+                         subtitle: Text(json[i]["dtl_adres"].toString()),
+                       )
+                     ],
+                   )
+               ),
+             )
+         );
+
+     }
+     return row;
+   }catch(error){
+     row.children.add(
+         Container(
+           width: 300,
+           height: 100,
+           decoration: BoxDecoration(
+               borderRadius: BorderRadius.circular(20),
+               color: Color(0xfff6f6f6)
+           ),
+           child: Center(
+             child: Text("서비스를 지원하지 않는 지역입니다.."),
+           ),
+         )
+     );
+     return row;
+   }
+  }
+ //리스트 만들어주는 메서드 기타 대피 시설
 }
 
