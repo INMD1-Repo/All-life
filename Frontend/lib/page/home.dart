@@ -122,82 +122,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                       // Make the content scrollable
                       child: Column(
                         children: [
-                          //폭염 주위하자
-                          Container(
-                            width: double.infinity,
-                            margin: EdgeInsets.only(bottom: 2),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                //공지사항인데 필요없는 기능이라고 생각하면 지워도됨
-                                Padding(
-                                  padding: EdgeInsets.all(5),
-                                  child: InkWell(
-                                    onTap: () {
-                                      // 버튼 클릭 시 실행할 코드
-                                      showDialog(
-                                          context: context,
-                                          builder: (context) {
-                                            return Dialog(
-                                              child: Container(
-                                                width: MediaQuery.of(context)
-                                                        .size
-                                                        .width *
-                                                    0.9,
-                                                height: MediaQuery.of(context)
-                                                        .size
-                                                        .height *
-                                                    0.6,
-                                                alignment: Alignment.center,
-                                                child: Column(
-                                                  mainAxisSize:
-                                                      MainAxisSize.min,
-                                                  children: [
-                                                    Image.asset(
-                                                      "assets/summer.jpg",
-                                                      fit: BoxFit.cover,
-                                                      height:
-                                                          MediaQuery.of(context)
-                                                                  .size
-                                                                  .height *
-                                                              0.5,
-                                                    )
-                                                  ],
-                                                ),
-                                              ),
-                                            );
-                                          });
-                                    },
-                                    child: Container(
-                                      width: double.infinity,
-                                      height: 50,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(20),
-                                        color: Color(0xffF0DB4A),
-                                      ),
-                                      child: Center(
-                                        child: Padding(
-                                          padding:
-                                              EdgeInsets.fromLTRB(20, 0, 0, 0),
-                                          child: Row(
-                                            children: [
-                                              Icon(Icons.warning),
-                                              SizedBox(width: 8),
-                                              // 아이콘과 텍스트 사이에 간격 추가
-                                              Text(
-                                                  "전국적 폭염에 따른 개인별 수착 안내사항(강조)"),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                )
-                              ],
-                            ),
-                          ),
                           // 가벼운 인사말 정도로?
                           Container(
+                            margin: EdgeInsets.only(top: 10),
                             width: double.infinity,
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -232,12 +159,18 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                           fontSize: 20,
                                           fontWeight: FontWeight.bold),
                                     )),
-                                SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
-                                  child: Row(
-                                    children: [_list_card()],
+                                Container(
+                                  width: double.infinity,
+                                  height: 150,
+                                  child: Center(
+                                    child: SingleChildScrollView(
+                                      scrollDirection: Axis.horizontal,
+                                      child: Row(
+                                        children: [_list_card()],
+                                      ),
+                                    ),
                                   ),
-                                )
+                                ),
                               ],
                             ),
                           ),
@@ -256,7 +189,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                 ),
                                 Container(
                                   width: double.infinity,
-                                  height: 100,
+                                  height: 150,
                                   child: Center(
                                     child: SingleChildScrollView(
                                       scrollDirection: Axis.horizontal,
@@ -286,7 +219,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                     padding: EdgeInsets.all(20),
                                     child: Container(
                                       width: double.infinity,
-                                      height: 100,
+                                      height: 150,
                                       decoration: BoxDecoration(
                                           borderRadius:
                                               BorderRadius.circular(20),
@@ -404,8 +337,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                   children: [
                     _buildButton(0, Icons.home, "홈", true, '/'),
                     _buildButton(1, Icons.place, "지도 보기", false, '/map'),
-                    _buildButton(2, Icons.settings, "설정", false, '/'),
-                    _buildButton(3, Icons.account_circle, "계정", false, '/'),
+                    _buildButton(2, Icons.diversity_3, "커뮤니티", false, '/'),
+                    _buildButton(3, Icons.settings, "설정", false, '/'),
                   ],
                 ),
               ),
@@ -453,7 +386,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       if (json.length == 0 || json.length! == null) {
         row.children.add(Container(
           width: 400,
-          height: 100,
+          height: 150,
           decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
               color: Color(0xfff6f6f6)),
@@ -465,8 +398,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       }
       for (int i = 0; i < json.length; i++) {
         row.children.add(Container(
-          width: 300,
-          height: 140,
+          width: 400,
+          height: 150,
           child: Card(
               clipBehavior: Clip.antiAlias,
               child: Column(
@@ -486,7 +419,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     } catch (error) {
       row.children.add(Container(
         width: 400,
-        height: 100,
+        height: 150,
         decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20), color: Color(0xfff6f6f6)),
         child: Center(
@@ -505,7 +438,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       if (json.length == 0 || json.length! == null) {
         row.children.add(Container(
           width: 400,
-          height: 100,
+          height: 150,
           decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
               color: Color(0xfff6f6f6)),
@@ -517,8 +450,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       }
       for (int i = 0; i < json.length; i++) {
         row.children.add(Container(
-          width: 300,
-          height: 140,
+          width: 400,
+          height: 150,
           child: Card(
               clipBehavior: Clip.antiAlias,
               child: Column(
@@ -538,7 +471,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     } catch (error) {
       row.children.add(Container(
         width: 400,
-        height: 100,
+        height: 150,
         decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20), color: Color(0xfff6f6f6)),
         child: Center(
