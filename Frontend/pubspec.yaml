@@ -69,8 +69,11 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-     -  .env
-     -  assets/summer.jpg
+     - .env
+     - assets/summer.jpg
+     - assets/my-location.png
+     - assets/earthquake.png
+     - assets/tsunami.png
 
 flutter_native_splash:
   android: true

@@ -128,8 +128,9 @@ final GoRouter _router = GoRouter(
       path: '/',
       builder: (context, state) => HomePage(),
     ),
-    GoRoute(path: '/map', builder: (context, state) => mapPage())
+    GoRoute(path: '/map', builder: (context, state) => mapPage()),
     // 추가 경로를 여기에 정의
+    GoRoute(path: '/VR-view', builder: (context, state) => VRViewPage())
   ],
   // 경로 오류 시 보여줄 페이지
   errorBuilder: (context, state) => ErrorPage(),
@@ -141,6 +142,15 @@ class ErrorPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text('Error')),
       body: Center(child: Text('Page not found')),
+    );
+  }
+}
+class VRViewPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('VR View')),
+      body: Center(child: Text('VR view content here')),
     );
   }
 }

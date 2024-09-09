@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:go_router/go_router.dart';
@@ -11,12 +13,24 @@ class mapPage extends StatefulWidget {
 }
 
 class _HomePageState extends State<mapPage> with WidgetsBindingObserver {
+  String? test;
+  String? earthquake;
+  String? tsunami; 
   late NLatLng _currentPosition;
+
+  bool _showContainer = false; // 조건을 저장하는 변수
+
+  void _toggleContainer() {
+    setState(() {
+      _showContainer = !_showContainer; // 조건 반전
+    });
+  }
 
   @override
   void initState() {
     super.initState();
     nowgps();
+    loadStorage();
     WidgetsBinding.instance.addObserver(this);
   }
 
@@ -33,13 +47,21 @@ class _HomePageState extends State<mapPage> with WidgetsBindingObserver {
     super.didChangeAppLifecycleState(state);
     if (state == AppLifecycleState.resumed) {
       nowgps();
+      loadStorage();
     }
+  }
+
+  Future<void> loadStorage() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    earthquake = sp.getString("earthquake_json");
+    tsunami = sp.getString("tsunami");
   }
 
   Future<void> nowgps() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     final String? lat = sp.getString("Latitude");
     final String? long = sp.getString("Longitude");
+
     setState(() {
       _currentPosition = NLatLng(double.parse(lat!), double.parse(long!));
     });
@@ -97,29 +119,66 @@ class _HomePageState extends State<mapPage> with WidgetsBindingObserver {
                   children: [
                     //네이버 지도 표시 부분
                     NaverMap(
-                      options: NaverMapViewOptions(
-                          locationButtonEnable: false,
-                          initialCameraPosition: NCameraPosition(
-                              target: _currentPosition ??
-                                  NLatLng(37.5666102, 126.9783881),
-                              zoom: 15)),
+                        options: NaverMapViewOptions(
+                            locationButtonEnable: false,
+                            initialCameraPosition: NCameraPosition(
+                                target: _currentPosition ??
+                                    NLatLng(37.5666102, 126.9783881),
+                                zoom: 13)),
+                        onMapReady: (controller) async {
+                          print("네이버 맵 로딩됨!");
+                          controller.addOverlay(NMarker(
+                              id: "1",
+                              position: _currentPosition,
+                              icon: NOverlayImage.fromAssetImage(
+                                  'assets/my-location.png'),
+                              size: Size(24, 24)));
+                          //지진 부분만 추가
+                          List<dynamic> markerData = jsonDecode(earthquake!);
+                          var count = 1;
+                          for (var item in markerData) {
+                            count++;
+                            NLatLng position = NLatLng(
+                                double.parse(item['ycord']),
+                                double.parse(item['xcord']));
+                            controller.addOverlay(
+                              NMarker(
+                                  id: count.toString(),
+                                  position: position,
+                                  icon: NOverlayImage.fromAssetImage(
+                                      'assets/earthquake.png'),
+                                  size: Size(24, 24)),
+                            );
+                          }
 
-                      onMapReady: (controller) {
-                        print("네이버 맵 로딩됨!");
-                        controller.addOverlay(
-                            NMarker(id: "1", position: _currentPosition));
-                      },
-                    ),
+                          //지진 부분만 추가
+                          List<dynamic> tsunamid = jsonDecode(tsunami!);
+                          for (var item in tsunamid) {
+                            count++;
+                            NLatLng position = NLatLng(
+                                double.parse(item['ycord']),
+                                double.parse(item['xcord']));
+                            controller.addOverlay(
+                              NMarker(
+                                  id: count.toString(),
+                                  position: position,
+                                  icon: NOverlayImage.fromAssetImage(
+                                      'assets/tsunami.png'),
+                                  size: Size(24, 24)),
+                            );
+                          }
+                        }),
                     //네이버 지도 위에 오버로 나타내는 부분
                     Positioned(
                         child: Container(
+                      width: MediaQuery.of(context).size.width * 1,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.end,
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           //지도 버튼들
                           Padding(
-                              padding: EdgeInsets.fromLTRB(10, 0, 20, 0),
+                              padding: EdgeInsets.fromLTRB(10, 0, 20, 10),
                               child: Column(children: [
                                 SizedBox.fromSize(
                                   size: Size(70, 70),
@@ -156,13 +215,22 @@ class _HomePageState extends State<mapPage> with WidgetsBindingObserver {
                                 )
                               ])),
                           //대피소 정보 제공
-                          Container(
-                            width: MediaQuery.of(context).size.width * 1,
-                            height: MediaQuery.of(context).size.height * 0.2,
-                              child: TextButton(
-                                  onPressed: () {}, child: Text("asdasd")
+                          if (_showContainer)
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.only(
+                                  topRight: Radius.circular(
+                                    30,
+                                  ),
+                                  topLeft: Radius.circular(30),
+                                ),
                               ),
-                          ),
+                              width: MediaQuery.of(context).size.width * 1,
+                              height: MediaQuery.of(context).size.height * 0.3,
+                              child: TextButton(
+                                  onPressed: () {}, child: Text("asdasd")),
+                            )
                         ],
                       ),
                     ))

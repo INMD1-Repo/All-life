@@ -60,7 +60,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         "http://hackton.powerinmd.com/tsunami_shelter?city=$city&dong=$dong");
     final req_s = await http.get(Url_s);
     tsunami = req_s.body;
-    sp.setString("earthquake_json", req_s.body);
+    sp.setString("tsunami_shelter", req_s.body);
 
     _list_card();
     setState(() {
