@@ -1,4 +1,4 @@
-package com.deu.hackton.all_life_app.java;
+package com.deu.hackton.all_life_app.java.samplerender;
 
 import android.opengl.GLES30;
 import android.util.Log;

@@ -1,12 +1,9 @@
-package com.deu.hackton.all_life_app.java;
+package com.deu.hackton.all_life_app.java.samplerender;
 
 
 import android.content.res.AssetManager;
 import android.opengl.GLES30;
 import android.opengl.GLSurfaceView;
-
-import com.deu.hackton.all_life_app.java.samplerender.Framebuffer;
-import com.deu.hackton.all_life_app.java.samplerender.Mesh;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;

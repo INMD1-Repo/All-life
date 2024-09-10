@@ -1,7 +1,6 @@
-package com.deu.hackton.all_life_app.java;
+package com.deu.hackton.all_life_app.java.samplerender;
 
 
-import android.app.Activity;
 import android.content.Context;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCharacteristics;

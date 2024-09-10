@@ -1,11 +1,10 @@
-package com.deu.hackton.all_life_app.java;
+package com.deu.hackton.all_life_app.java.samplerender;
 
 
 import android.opengl.GLES30;
 import java.io.Closeable;
 import java.nio.IntBuffer;
 
-/
 public class IndexBuffer implements Closeable {
     private final GpuBuffer buffer;
 

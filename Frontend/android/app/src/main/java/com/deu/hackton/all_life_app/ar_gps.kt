@@ -1,59 +1,103 @@
-package com.deu.hackton.all_life_app
+// ar_gps.kt
+package com.deu.hackton.all_life
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.util.Log
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import com.deu.hackton.all_life_app.HelloGeoRenderer
+import com.deu.hackton.all_life_app.helpers.ARCoreSessionLifecycleHelper
+import com.deu.hackton.all_life_app.helpers.GeoPermissionsHelper
+import com.deu.hackton.all_life_app.helpers.HelloGeoView
+import com.google.ar.core.Config
+import com.google.ar.core.Session
+import com.google.ar.core.exceptions.CameraNotAvailableException
+import com.google.ar.core.exceptions.UnavailableApkTooOldException
+import com.google.ar.core.exceptions.UnavailableDeviceNotCompatibleException
+import com.google.ar.core.exceptions.UnavailableSdkTooOldException
+import com.google.ar.core.exceptions.UnavailableUserDeclinedInstallationException
+import com.deu.hackton.all_life_app.java.samplerender.SampleRender
+import com.deu.hackton.all_life_app.java.helpers.FullScreenHelper
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
+class ARGPSFragment : AppCompatActivity() {
+    companion object {
+        private const val TAG =  "ar_gps"
+    }
 
-/**
- * A simple [Fragment] subclass.
- * Use the [ar_gps.newInstance] factory method to
- * create an instance of this fragment.
- */
-class ar_gps : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+    lateinit var arCoreSessionHelper: ARCoreSessionLifecycleHelper
+    lateinit var view: HelloGeoView
+    lateinit var renderer: HelloGeoRenderer
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
+// Setup ARCore session lifecycle helper and configuration.
+        arCoreSessionHelper = ARCoreSessionLifecycleHelper(this)
+        // If Session creation or Session.resume() fails, display a message and log detailed
+        // information.
+        arCoreSessionHelper.exceptionCallback =
+            { exception ->
+                val message =
+                    when (exception) {
+                        is UnavailableUserDeclinedInstallationException ->
+                            "Please install Google Play Services for AR"
+                        is UnavailableApkTooOldException -> "Please update ARCore"
+                        is UnavailableSdkTooOldException -> "Please update this app"
+                        is UnavailableDeviceNotCompatibleException -> "This device does not support AR"
+                        is CameraNotAvailableException -> "Camera not available. Try restarting the app."
+                        else -> "Failed to create AR session: $exception"
+                    }
+                Log.e(TAG, "ARCore threw an exception", exception)
+                view.snackbarHelper.showError(this, message)
+            }
+
+        // Configure session features.
+        arCoreSessionHelper.beforeSessionResume = ::configureSession
+        lifecycle.addObserver(arCoreSessionHelper)
+
+        // Set up the Hello AR renderer.
+        renderer = HelloGeoRenderer(this)
+        lifecycle.addObserver(renderer)
+
+        // Set up Hello AR UI.
+        view = HelloGeoView(this)
+        lifecycle.addObserver(view)
+        setContentView(view.root)
+
+        // Sets up an example renderer using our HelloGeoRenderer.
+        SampleRender(view.surfaceView, renderer, assets)
+    }
+
+    // Configure the session, setting the desired options according to your usecase.
+    fun configureSession(session: Session) {
+        session.configure(
+            session.config.apply {
+                // Enable Geospatial Mode.
+                geospatialMode = Config.GeospatialMode.ENABLED
+            }
+        )
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        results: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, results)
+        if (!GeoPermissionsHelper.hasGeoPermissions(this)) {
+            // Use toast instead of snackbar here since the activity will exit.
+            Toast.makeText(this, "Camera and location permissions are needed to run this application", Toast.LENGTH_LONG)
+                .show()
+            if (!GeoPermissionsHelper.shouldShowRequestPermissionRationale(this)) {
+                // Permission denied with checking "Do not ask again".
+                GeoPermissionsHelper.launchPermissionSettings(this)
+            }
+            finish()
         }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_ar_gps, container, false)
-    }
-
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment ar_gps.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            ar_gps().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        FullScreenHelper.setFullScreenOnWindowFocusChanged(this, hasFocus)
     }
 }
+

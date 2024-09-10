@@ -7,12 +7,12 @@ plugins {
 
 android {
     namespace = "com.deu.hackton.all_life_app"
-    compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    compileSdk 34
+    ndkVersion "26.1.10909125"
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = kotlin_version
+        targetCompatibility = kotlin_version
     }
 
     kotlinOptions {
@@ -37,6 +37,22 @@ android {
             signingConfig = signingConfigs.debug
         }
     }
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    // 다른 의존성 추가
+    implementation 'com.google.android.gms:play-services-maps:19.0.0'
+    implementation 'com.google.android.gms:play-services-location:21.3.0'
+    implementation 'com.google.android.gms:play-services-auth:21.2.0'
+
+    implementation 'com.google.ar:core:1.45.0'
+    implementation 'de.javagl:obj:0.4.0'
+    implementation 'com.google.android.material:material:1.12.0'
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'androidx.lifecycle:lifecycle-common-java8:2.8.5'
+    implementation 'com.google.maps.android:maps-compose:6.1.2'
+
 }
 
 flutter {

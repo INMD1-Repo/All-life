@@ -190,7 +190,9 @@ class _HomePageState extends State<mapPage> with WidgetsBindingObserver {
                                       child: InkWell(
                                         splashColor: Colors.green,
                                         // splash color
-                                        onTap: () {},
+                                        onTap: () {
+                                          context.go("/VR-view");
+                                        },
                                         // button pressed
                                         child: Column(
                                           mainAxisAlignment:

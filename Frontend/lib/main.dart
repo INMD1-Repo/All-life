@@ -1,3 +1,4 @@
+import 'package:all_life/page/armode.dart';
 import 'package:all_life/page/map.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
@@ -123,14 +124,12 @@ void Get_GPS(Client_ID, Client_Secret) async {
 // GoRouter 설정
 final GoRouter _router = GoRouter(
   routes: [
-    GoRoute(
-      // 초기 경로에 해당하는 페이지
-      path: '/',
-      builder: (context, state) => HomePage(),
-    ),
+    // 초기 경로에 해당하는 페이지
+    GoRoute(path: '/', builder: (context, state) => HomePage()),
+    // 지도 페이지
     GoRoute(path: '/map', builder: (context, state) => mapPage()),
     // 추가 경로를 여기에 정의
-    GoRoute(path: '/VR-view', builder: (context, state) => VRViewPage())
+    GoRoute(path: '/VR-view', builder: (context, state) => armodePage())
   ],
   // 경로 오류 시 보여줄 페이지
   errorBuilder: (context, state) => ErrorPage(),
@@ -145,12 +144,4 @@ class ErrorPage extends StatelessWidget {
     );
   }
 }
-class VRViewPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('VR View')),
-      body: Center(child: Text('VR view content here')),
-    );
-  }
-}
+

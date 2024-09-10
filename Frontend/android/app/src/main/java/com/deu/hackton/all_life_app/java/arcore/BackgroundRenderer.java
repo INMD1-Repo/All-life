@@ -7,11 +7,10 @@ import com.deu.hackton.all_life_app.java.samplerender.Mesh;
 import com.google.ar.core.Coordinates2d;
 import com.google.ar.core.Frame;
 import com.deu.hackton.all_life_app.java.samplerender.Framebuffer;
-import com.google.ar.core.examples.java.common.samplerender.Mesh;
-import com.google.ar.core.examples.java.common.samplerender.SampleRender;
-import com.google.ar.core.examples.java.common.samplerender.Shader;
-import com.google.ar.core.examples.java.common.samplerender.Texture;
-import com.google.ar.core.examples.java.common.samplerender.VertexBuffer;
+import com.deu.hackton.all_life_app.java.samplerender.SampleRender;
+import com.deu.hackton.all_life_app.java.samplerender.Shader;
+import com.deu.hackton.all_life_app.java.samplerender.Texture;
+import com.deu.hackton.all_life_app.java.samplerender.VertexBuffer;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -60,11 +59,7 @@ public class BackgroundRenderer {
     private boolean useOcclusion;
     private float aspectRatio;
 
-    /**
-     * Allocates and initializes OpenGL resources needed by the background renderer. Must be called
-     * during a {@link SampleRender.Renderer} callback, typically in {@link
-     * SampleRender.Renderer#onSurfaceCreated()}.
-     */
+
     public BackgroundRenderer(SampleRender render) {
         cameraColorTexture =
                 new Texture(
@@ -159,12 +154,6 @@ public class BackgroundRenderer {
         }
     }
 
-    /**
-     * Updates the display geometry. This must be called every frame before calling either of
-     * BackgroundRenderer's draw methods.
-     *
-     * @param frame The current {@code Frame} as returned by {@link Session#update()}.
-     */
     public void updateDisplayGeometry(Frame frame) {
         if (frame.hasDisplayGeometryChanged()) {
             // If display rotation changed (also includes view size change), we need to re-query the UV
@@ -208,14 +197,7 @@ public class BackgroundRenderer {
         render.draw(mesh, backgroundShader);
     }
 
-    /**
-     * Draws the virtual scene. Any objects rendered in the given {@link Framebuffer} will be drawn
-     * given the previously specified {@link OcclusionMode}.
-     *
-     * <p>Virtual content should be rendered using the matrices provided by {@link
-     * com.google.ar.core.Camera#getViewMatrix(float[], int)} and {@link
-     * com.google.ar.core.Camera#getProjectionMatrix(float[], int, float, float)}.
-     */
+
     public void drawVirtualScene(
             SampleRender render, Framebuffer virtualSceneFramebuffer, float zNear, float zFar) {
         occlusionShader.setTexture(
