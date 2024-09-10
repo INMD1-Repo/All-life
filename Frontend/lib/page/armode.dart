@@ -12,25 +12,20 @@ class armodePage extends StatefulWidget {
 class _ArmodePageState extends State<armodePage> with WidgetsBindingObserver {
   static const platform = MethodChannel('com.deu.hackton.all_life/native');
 
-  Future<void> _startFragmentActivity() async {
-    try {
-      await platform.invokeMethod('startFragmentActivity');
-    } on PlatformException catch (e) {
-      print("Fragment Activity를 시작하는 중 오류 발생: ${e.message}");
-    }
-  }
 
-  @override
+
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: Text('Flutter와 Fragment'),
+          title: Text('AR GPS Example'),
         ),
         body: Center(
           child: ElevatedButton(
-            onPressed: _startFragmentActivity,
-            child: Text('Fragment Activity 시작'),
+            onPressed: () {
+              platform.invokeMethod('startARGPS');
+            },
+            child: Text('Start AR GPS'),
           ),
         ),
       ),

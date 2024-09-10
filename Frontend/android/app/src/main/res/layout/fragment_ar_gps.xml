@@ -4,12 +4,14 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+    <!-- OpenGL Surface for rendering AR content -->
     <android.opengl.GLSurfaceView
         android:id="@+id/surfaceview"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_gravity="top" />
 
+    <!-- Custom wrapper to handle touch events around the map -->
     <com.deu.hackton_all_life_app.MapTouchWrapper
         android:id="@+id/map_wrapper"
         android:layout_width="match_parent"
@@ -17,22 +19,29 @@
         android:layout_alignParentBottom="true"
         tools:ignore="MissingClass">
 
+        <!-- Google Maps Fragment to display the map -->
         <fragment
             android:id="@+id/map"
             android:name="com.google.android.gms.maps.SupportMapFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             tools:context=".HelloGeoActivity" />
+
+        <!-- TextView to display status information -->
         <TextView
+            android:id="@+id/statusText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:padding="8dp"
             android:textColor="@android:color/black"
             android:background="#AAFFFFFF"
-            android:layout_width="wrap_content"
-            android:fontFamily="monospace"
-            android:layout_height="wrap_content"
-            android:id="@+id/statusText"
-            />
+            android:fontFamily="monospace" />
     </com.deu.hackton_all_life_app.MapTouchWrapper>
 
-
+    <!-- Container to hold the ARGPSFragment -->
+    <FrameLayout
+        android:id="@+id/fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/surfaceview" />
 </RelativeLayout>
