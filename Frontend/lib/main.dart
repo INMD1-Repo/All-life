@@ -1,4 +1,3 @@
-import 'package:all_life/page/armode.dart';
 import 'package:all_life/page/map.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
@@ -129,7 +128,6 @@ final GoRouter _router = GoRouter(
     // 지도 페이지
     GoRoute(path: '/map', builder: (context, state) => mapPage()),
     // 추가 경로를 여기에 정의
-    GoRoute(path: '/VR-view', builder: (context, state) => armodePage())
   ],
   // 경로 오류 시 보여줄 페이지
   errorBuilder: (context, state) => ErrorPage(),

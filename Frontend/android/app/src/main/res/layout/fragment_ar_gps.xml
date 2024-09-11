@@ -4,13 +4,14 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+
     <android.opengl.GLSurfaceView
         android:id="@+id/surfaceview"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_gravity="top" />
 
-    <com.deu.hackton_all_life_app.MapTouchWrapper
+    <com.deu.hackton.all_life_app.helpers.MapTouchWrapper
         android:id="@+id/map_wrapper"
         android:layout_width="match_parent"
         android:layout_height="300dp"
@@ -32,7 +33,7 @@
             android:layout_height="wrap_content"
             android:id="@+id/statusText"
             />
-    </com.deu.hackton_all_life_app.MapTouchWrapper>
+    </com.deu.hackton.all_life_app.helpers.MapTouchWrapper>
 
 
 </RelativeLayout>

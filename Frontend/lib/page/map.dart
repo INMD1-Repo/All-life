@@ -1,5 +1,5 @@
 import 'dart:convert';
-
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:go_router/go_router.dart';
@@ -19,6 +19,16 @@ class _HomePageState extends State<mapPage> with WidgetsBindingObserver {
   late NLatLng _currentPosition;
 
   bool _showContainer = false; // 조건을 저장하는 변수
+
+  static const platform = MethodChannel('com.deu.hackton.all_life/native');
+
+  Future<void> _startFragmentActivity() async {
+    try {
+      await platform.invokeMethod('startFragmentActivity');
+    } on PlatformException catch (e) {
+      print("Fragment Activity를 시작하는 중 오류 발생: ${e.message}");
+    }
+  }
 
   void _toggleContainer() {
     setState(() {
@@ -191,7 +201,7 @@ class _HomePageState extends State<mapPage> with WidgetsBindingObserver {
                                         splashColor: Colors.green,
                                         // splash color
                                         onTap: () {
-                                          context.go("/VR-view");
+                                          _startFragmentActivity();
                                         },
                                         // button pressed
                                         child: Column(
@@ -256,8 +266,8 @@ class _HomePageState extends State<mapPage> with WidgetsBindingObserver {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    _buildButton(0, Icons.home, "홈", true, '/'),
-                    _buildButton(1, Icons.place, "지도 보기", false, '/map'),
+                    _buildButton(0, Icons.home, "홈", false, '/'),
+                    _buildButton(1, Icons.place, "지도 보기", true, '/map'),
                     _buildButton(2, Icons.diversity_3, "커뮤니티", false, '/'),
                     _buildButton(3, Icons.settings, "설정", false, '/'),
                   ],
