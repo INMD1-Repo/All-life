@@ -4,23 +4,13 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-<<<<<<< HEAD
-
-=======
-    <!-- OpenGL Surface for rendering AR content -->
->>>>>>> 78be6cdfe3afcdda045847441d85e18c0b1b2764
     <android.opengl.GLSurfaceView
         android:id="@+id/surfaceview"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_gravity="top" />
 
-<<<<<<< HEAD
     <com.deu.hackton.all_life_app.helpers.MapTouchWrapper
-=======
-    <!-- Custom wrapper to handle touch events around the map -->
-    <com.deu.hackton_all_life_app.MapTouchWrapper
->>>>>>> 78be6cdfe3afcdda045847441d85e18c0b1b2764
         android:id="@+id/map_wrapper"
         android:layout_width="match_parent"
         android:layout_height="300dp"
@@ -43,17 +33,12 @@
             android:padding="8dp"
             android:textColor="@android:color/black"
             android:background="#AAFFFFFF"
-<<<<<<< HEAD
             android:layout_width="wrap_content"
             android:fontFamily="monospace"
             android:layout_height="wrap_content"
             android:id="@+id/statusText"
             />
     </com.deu.hackton.all_life_app.helpers.MapTouchWrapper>
-=======
-            android:fontFamily="monospace" />
-    </com.deu.hackton_all_life_app.MapTouchWrapper>
->>>>>>> 78be6cdfe3afcdda045847441d85e18c0b1b2764
 
     <!-- Container to hold the ARGPSFragment -->
     <FrameLayout
