@@ -4,6 +4,7 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+
     <android.opengl.GLSurfaceView
         android:id="@+id/surfaceview"
         android:layout_width="fill_parent"
@@ -17,19 +18,13 @@
         android:layout_alignParentBottom="true"
         tools:ignore="MissingClass">
 
-        <!-- Google Maps Fragment to display the map -->
         <fragment
             android:id="@+id/map"
             android:name="com.google.android.gms.maps.SupportMapFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             tools:context=".HelloGeoActivity" />
-
-        <!-- TextView to display status information -->
         <TextView
-            android:id="@+id/statusText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:padding="8dp"
             android:textColor="@android:color/black"
             android:background="#AAFFFFFF"
@@ -40,10 +35,5 @@
             />
     </com.deu.hackton.all_life_app.helpers.MapTouchWrapper>
 
-    <!-- Container to hold the ARGPSFragment -->
-    <FrameLayout
-        android:id="@+id/fragment_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/surfaceview" />
+
 </RelativeLayout>

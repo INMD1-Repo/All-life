@@ -2,9 +2,9 @@ package com.deu.hackton.all_life_app
 
 import android.opengl.Matrix
 import android.util.Log
-import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import com.deu.hackton.all_life.ARGPSFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.ar.core.Anchor
 import com.google.ar.core.TrackingState
@@ -20,7 +20,7 @@ import com.google.ar.core.exceptions.CameraNotAvailableException
 import java.io.IOException
 
 
-class HelloGeoRenderer(val activity: FragmentActivity) :
+class HelloGeoRenderer(val activity: ARGPSFragment) :
     SampleRender.Renderer, DefaultLifecycleObserver {
     //<editor-fold desc="ARCore initialization" defaultstate="collapsed">
     companion object {

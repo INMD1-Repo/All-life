@@ -2,8 +2,6 @@
 package com.deu.hackton.all_life_app;
 
 import android.content.Intent
-import android.os.Bundle
-import com.deu.hackton.all_life.ARGPSFragment
 import com.deu.hackton.all_life.MyFragmentActivity
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -13,19 +11,23 @@ class MainActivity: FlutterActivity() {
 
     private val CHANNEL = "com.deu.hackton.all_life/native"
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        flutterEngine?.dartExecutor?.binaryMessenger?.let {
-            MethodChannel(it, CHANNEL).setMethodCallHandler { call, result ->
-                if (call.method == "startARGPS") {
-                    // Start AR GPS Fragment activity
-                    startActivity(Intent(this, ARGPSFragment::class.java))
-                    result.success("AR GPS Started")
-                } else {
+    override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
+        super.configureFlutterEngine(flutterEngine)
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
+            when (call.method) {
+                "startFragmentActivity" -> {
+                    startFragmentActivity()
+                    result.success("Fragment Activity started")
+                }
+                else -> {
                     result.notImplemented()
                 }
             }
         }
+    }
+
+    private fun startFragmentActivity() {
+        val intent = Intent(this, MyFragmentActivity::class.java)
+        startActivity(intent)
     }
 }

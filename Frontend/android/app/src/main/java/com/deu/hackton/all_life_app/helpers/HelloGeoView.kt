@@ -3,9 +3,11 @@ package com.deu.hackton.all_life_app.helpers
 import android.opengl.GLSurfaceView
 import android.view.View
 import android.widget.TextView
-import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import com.deu.hackton.all_life.ARGPSFragment
+import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.LatLng
 import com.google.ar.core.Earth
 import com.google.ar.core.GeospatialPose
 import com.deu.hackton.all_life_app.R
@@ -13,7 +15,7 @@ import com.deu.hackton.all_life_app.java.samplerender.SnackbarHelper
 import com.google.android.gms.maps.MapView
 
 /** Contains UI elements for Hello Geo. */
-class HelloGeoView(val activity: FragmentActivity) : DefaultLifecycleObserver {
+class HelloGeoView(val activity: ARGPSFragment) : DefaultLifecycleObserver {
     val root = View.inflate(activity, R.layout.fragment_ar_gps, null)
     val surfaceView = root.findViewById<GLSurfaceView>(R.id.surfaceview)
 
