@@ -74,6 +74,14 @@ flutter:
      - assets/my-location.png
      - assets/earthquake.png
      - assets/tsunami.png
+     - assets/mapicon/earthquake0.png
+     - assets/mapicon/earthquake1.png
+     - assets/mapicon/earthquake2.png
+     - assets/mapicon/earthquake4.png
+     - assets/mapicon/tsunami0.png
+     - assets/mapicon/tsunami1.png
+     - assets/mapicon/tsunami2.png
+     - assets/mapicon/tsunami4.png
 
 flutter_native_splash:
   android: true

@@ -50,14 +50,14 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
     //자체제작한 API에서 가지고 대피소 정보를 가지고옴
     final Url = Uri.parse(
-        "http://hackton.powerinmd.com/earthquake_shelter?city=$city&dong=$dong");
+        'http://hackton.powerinmd.com/api/earthquake-shelters?filters[dtl_adres][\$contains]=$city $dong');
     final req = await http.get(Url);
     earthquake = req.body;
     sp.setString("earthquake_json", req.body);
 
     //자체제작한 API에서 가지고 대피소 정보를 가지고옴
     final Url_s = Uri.parse(
-        "http://hackton.powerinmd.com/tsunami_shelter?city=$city&dong=$dong");
+        "http://hackton.powerinmd.com/api/tsunami-evacuations?filters[address][\$contains]=$city $dong");
     final req_s = await http.get(Url_s);
     tsunami = req_s.body;
     sp.setString("tsunami_shelter", req_s.body);
@@ -338,7 +338,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                     _buildButton(0, Icons.home, "홈", true, '/'),
                     _buildButton(1, Icons.place, "지도 보기", false, '/map'),
                     _buildButton(2, Icons.diversity_3, "커뮤니티", false, '/'),
-                    _buildButton(3, Icons.settings, "설정", false, '/'),
+                    _buildButton(3, Icons.account_circle, "계정", false, '/'),
                   ],
                 ),
               ),
@@ -383,6 +383,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     Row row = Row(children: []);
     try {
       var json = jsonDecode(earthquake!);
+      json = json["data"];
       if (json.length == 0 || json.length! == null) {
         row.children.add(Container(
           width: 400,
@@ -397,6 +398,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         return row;
       }
       for (int i = 0; i < json.length; i++) {
+
         row.children.add(Container(
           width: 400,
           height: 150,
@@ -407,9 +409,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                   Image.network('https://picsum.photos/250?image=9',
                       fit: BoxFit.cover, width: double.infinity, height: 60),
                   ListTile(
-                    title: Text(json[i]["vt_acmdfclty_nm"].toString(),
+                    title: Text(json[i]["attributes"]["vt_acmdfclty_nm"].toString(),
                         style: TextStyle(fontWeight: FontWeight.bold)),
-                    subtitle: Text(json[i]["dtl_adres"].toString()),
+                    subtitle: Text(json[i]["attributes"]["dtl_adres"].toString()),
                   )
                 ],
               )),
@@ -435,6 +437,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     Row row = Row(children: []);
     try {
       var json = jsonDecode(tsunami!);
+      json = json["data"];
       if (json.length == 0 || json.length! == null) {
         row.children.add(Container(
           width: 400,
@@ -459,9 +462,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                   Image.network('https://picsum.photos/250?image=9',
                       fit: BoxFit.cover, width: double.infinity, height: 60),
                   ListTile(
-                    title: Text(json[i]["vt_acmdfclty_nm"].toString(),
+                    title: Text(json[i]["attributes"]["vt_acmdfclty_nm"].toString(),
                         style: TextStyle(fontWeight: FontWeight.bold)),
-                    subtitle: Text(json[i]["dtl_adres"].toString()),
+                    subtitle: Text(json[i]["attributes"]["dtl_adres"].toString()),
                   )
                 ],
               )),
