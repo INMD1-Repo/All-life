@@ -16,6 +16,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   String? test;
   String? earthquake;
   String? tsunami;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
@@ -71,6 +72,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       body: SafeArea(
         // SafeArea로 화면 영역 보호
         child: Container(
@@ -101,6 +103,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                         icon: Icon(Icons.menu, color: Colors.grey),
                         onPressed: () {
                           // 메뉴 버튼 클릭 시 실행할 코드
+                          _scaffoldKey.currentState?.openDrawer();
                         },
                       ),
                       Text(
@@ -344,6 +347,17 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               ),
             ],
           ),
+        ),
+      ),
+      //윈쪽 메뉴 공개합니다
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            const DrawerHeader(decoration: BoxDecoration(
+              color: Colors.blue
+            ), child: null,)
+          ],
         ),
       ),
     );

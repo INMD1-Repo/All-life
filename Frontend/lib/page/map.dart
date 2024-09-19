@@ -17,6 +17,7 @@ class _HomePageState extends State<mapPage> with WidgetsBindingObserver {
   String? earthquake;
   String? tsunami;
   late NLatLng _currentPosition;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   bool _showContainer = false; // 조건을 저장하는 변수
 
@@ -98,7 +99,6 @@ class _HomePageState extends State<mapPage> with WidgetsBindingObserver {
       return basePath + "0.png";
     }
   }
-
   //-----------마커 이미지 불려오는 끝--------------------------
 
   @override
@@ -200,6 +200,7 @@ class _HomePageState extends State<mapPage> with WidgetsBindingObserver {
                                   icon: Icon(Icons.menu, color: Colors.grey),
                                   onPressed: () {
                                     // 메뉴 버튼 클릭 시 실행할 코드
+                                    _scaffoldKey.currentState?.openDrawer();
                                   },
                                 ),
                                 Text(
@@ -336,6 +337,16 @@ class _HomePageState extends State<mapPage> with WidgetsBindingObserver {
               ),
             ],
           ),
+        ),
+      ),      //윈쪽 메뉴 공개합니다
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            const DrawerHeader(decoration: BoxDecoration(
+                color: Colors.blue
+            ), child: null,)
+          ],
         ),
       ),
     );
