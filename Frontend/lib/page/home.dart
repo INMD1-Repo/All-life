@@ -354,9 +354,137 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-            const DrawerHeader(decoration: BoxDecoration(
-              color: Colors.blue
-            ), child: null,)
+            //빈공간
+            Expanded(
+              flex: 1,
+              child: Container(
+                height: 100,
+              ),
+            ),
+            //메뉴 로그인 요소들
+            Expanded(
+                flex: 8,
+                child: Container(
+                  alignment: Alignment.centerLeft,
+                  margin: EdgeInsets.fromLTRB(20, 0, 20, 0),
+                  child: Column(
+                    children: [
+                      //=======================프로필 나타내는 구간========================
+
+                      //=======================프로필 나타내는 구간 끝========================
+                      //=======================버튼 나타내튼 구간========================
+                      //=======================지도========================
+                      Container(height: 10),
+                      SizedBox(
+                        width: 230, // 텍스트보다 큰 부모 위젯
+                        child: Align(
+                          alignment: Alignment.centerLeft, // 텍스트를 왼쪽으로 정렬
+                          child: Text('지도'),
+                        ),
+                      ),
+                      SizedBox(
+                        width: double.infinity * 0.3,
+                        child: TextButton.icon(
+                          onPressed: () {},
+                          icon: const Icon(Icons.map),
+                          label: const Text('지도보기', style: TextStyle(fontWeight: FontWeight.bold),),
+                          style: TextButton.styleFrom(
+                            alignment: Alignment.centerLeft, // 왼쪽 정렬
+                          ),
+                        ),
+                      ),
+                      Divider(
+                        color: Colors.grey, // 선 색상
+                        thickness: 1, // 선 두께
+                        indent: 10, // 왼쪽 여백
+                        endIndent: 10, // 오른쪽 여백
+                      ),
+                      //=======================지도 끝========================
+                      //=======================커뮤니티========================
+                      Container(height: 5),
+                      SizedBox(
+                        width: 230, // 텍스트보다 큰 부모 위젯
+                        child: Align(
+                          alignment: Alignment.centerLeft, // 텍스트를 왼쪽으로 정렬
+                          child: Text('커뮤니티'),
+                        ),
+                      ),
+                      SizedBox(
+                        width: double.infinity * 0.3,
+                        child: TextButton.icon(
+                          onPressed: () {},
+                          icon: const Icon(Icons.map),
+                          label: const Text('지도보기', style: TextStyle(fontWeight: FontWeight.bold),),
+                          style: TextButton.styleFrom(
+                            alignment: Alignment.centerLeft, // 왼쪽 정렬
+                          ),
+                        ),
+                      ),
+                      Container(height: 5),
+                      SizedBox(
+                        width: double.infinity * 0.3,
+                        child: TextButton.icon(
+                          onPressed: () {},
+                          icon: const Icon(Icons.map),
+                          label: const Text('대피소 리뷰보기', style: TextStyle(fontWeight: FontWeight.bold),),
+                          style: TextButton.styleFrom(
+                            alignment: Alignment.centerLeft, // 왼쪽 정렬
+                          ),
+                        ),
+                      ),
+                      Container(height: 5),
+                      SizedBox(
+                        width: double.infinity * 0.3,
+                        child: TextButton.icon(
+                          onPressed: () {},
+                          icon: const Icon(Icons.map),
+                          label: const Text('리뷰 수정및 작성하기', style: TextStyle(fontWeight: FontWeight.bold),),
+                          style: TextButton.styleFrom(
+                            alignment: Alignment.centerLeft, // 왼쪽 정렬
+                          ),
+                        ),
+                      ),
+                      Container(height: 5),
+                      Divider(
+                        color: Colors.grey, // 선 색상
+                        thickness: 1, // 선 두께
+                        indent: 10, // 왼쪽 여백
+                        endIndent: 10, // 오른쪽 여백
+                      ),
+                      //=======================커뮤니티 끝========================
+                      //=======================계정 및 설정 ========================
+                      Container(height: 5),
+                      SizedBox(
+                        width: 230, // 텍스트보다 큰 부모 위젯
+                        child: Align(
+                          alignment: Alignment.centerLeft, // 텍스트를 왼쪽으로 정렬
+                          child: Text('계정 및 설정'),
+                        ),
+                      ),
+                      Container(height: 5),
+                      SizedBox(
+                        width: double.infinity * 0.3,
+                        child: TextButton.icon(
+                          onPressed: () {},
+                          icon: const Icon(Icons.map),
+                          label: const Text('마이프로필', style: TextStyle(fontWeight: FontWeight.bold),),
+                          style: TextButton.styleFrom(
+                            alignment: Alignment.centerLeft, // 왼쪽 정렬
+                          ),
+                        ),
+                      )
+                      //=======================계정 및 설정 끝========================
+                      //=======================버튼 나타내튼 구간 끝========================
+                    ],
+                  ),
+                )),
+            //빈공간
+            Expanded(
+              flex: 1,
+              child: Container(
+                height: 100,
+              ),
+            ),
           ],
         ),
       ),
@@ -412,7 +540,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         return row;
       }
       for (int i = 0; i < json.length; i++) {
-
         row.children.add(Container(
           width: 400,
           height: 150,
@@ -423,9 +550,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                   Image.network('https://picsum.photos/250?image=9',
                       fit: BoxFit.cover, width: double.infinity, height: 60),
                   ListTile(
-                    title: Text(json[i]["attributes"]["vt_acmdfclty_nm"].toString(),
+                    title: Text(
+                        json[i]["attributes"]["vt_acmdfclty_nm"].toString(),
                         style: TextStyle(fontWeight: FontWeight.bold)),
-                    subtitle: Text(json[i]["attributes"]["dtl_adres"].toString()),
+                    subtitle:
+                        Text(json[i]["attributes"]["dtl_adres"].toString()),
                   )
                 ],
               )),
@@ -476,9 +605,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                   Image.network('https://picsum.photos/250?image=9',
                       fit: BoxFit.cover, width: double.infinity, height: 60),
                   ListTile(
-                    title: Text(json[i]["attributes"]["vt_acmdfclty_nm"].toString(),
+                    title: Text(
+                        json[i]["attributes"]["vt_acmdfclty_nm"].toString(),
                         style: TextStyle(fontWeight: FontWeight.bold)),
-                    subtitle: Text(json[i]["attributes"]["dtl_adres"].toString()),
+                    subtitle:
+                        Text(json[i]["attributes"]["dtl_adres"].toString()),
                   )
                 ],
               )),
