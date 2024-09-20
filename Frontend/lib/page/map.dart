@@ -330,7 +330,7 @@ class _HomePageState extends State<mapPage> with WidgetsBindingObserver {
                   children: [
                     _buildButton(0, Icons.home, "홈", false, '/'),
                     _buildButton(1, Icons.place, "지도 보기", true, '/map'),
-                    _buildButton(2, Icons.diversity_3, "커뮤니티", false, '/'),
+                    _buildButton(2, Icons.diversity_3, "커뮤니티", false, '/community/reivew'),
                     _buildButton(3, Icons.account_circle, "계정", false, '/'),
                   ],
                 ),

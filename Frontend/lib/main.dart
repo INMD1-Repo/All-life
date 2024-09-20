@@ -1,3 +1,6 @@
+import 'package:all_life/page/Community/message_center.dart';
+import 'package:all_life/page/Community/review.dart';
+import 'package:all_life/page/Community/review_create.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:geolocator/geolocator.dart';
@@ -78,6 +81,10 @@ final GoRouter _router = GoRouter(
     GoRoute(path: '/', builder: (context, state) => HomePage()),
     // 지도 페이지
     GoRoute(path: '/map', builder: (context, state) => mapPage()),
+    //커뮤티티 페이지
+    GoRoute(path: '/community/review_create', builder: (context, state) => review_create()),
+    GoRoute(path: '/community/message_center', builder: (context, state) => message_center()),
+    GoRoute(path: '/community/reivew', builder: (context, state) => reivew()),
     // 추가 경로를 여기에 정의
   ],
   // 경로 오류 시 보여줄 페이지
