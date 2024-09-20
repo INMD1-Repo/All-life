@@ -100,7 +100,10 @@ class ALLlife extends StatelessWidget {
     return MaterialApp.router(
       title: 'ALL-Life',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        iconTheme: IconThemeData(color: Colors.black), // Set icon color
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(foregroundColor: Colors.black), // Set text button color
+        ),
       ),
       routerConfig: _router, // GoRouter 라우터 사용
     );
