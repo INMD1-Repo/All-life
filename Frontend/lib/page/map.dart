@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'dart:ui';
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -9,14 +11,15 @@ class mapPage extends StatefulWidget {
   const mapPage({super.key});
 
   @override
-  _HomePageState createState() => _HomePageState();
+  _mapPageState createState() => _mapPageState();
 }
 
-class _HomePageState extends State<mapPage> with WidgetsBindingObserver {
-  String? test;
+class _mapPageState extends State<mapPage> with WidgetsBindingObserver {
   String? earthquake;
   String? tsunami;
-  late NLatLng _currentPosition;
+
+  NaverMapController? _mapController; // NaverMapController 선언
+
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   bool _showContainer = false; // 조건을 저장하는 변수
@@ -31,17 +34,16 @@ class _HomePageState extends State<mapPage> with WidgetsBindingObserver {
       print("Fragment Activity를 시작하는 중 오류 발생: ${e.message}");
     }
   }
-
-  void _toggleContainer() {
+  //유동성을 위한 함수
+  void _toggleContainer(allw) {
     setState(() {
-      _showContainer = !_showContainer; // 조건 반전
+      _showContainer = allw; // 조건 반전
     });
   }
 
   @override
   void initState() {
     super.initState();
-    nowgps();
     loadStorage();
     WidgetsBinding.instance.addObserver(this);
   }
@@ -58,7 +60,6 @@ class _HomePageState extends State<mapPage> with WidgetsBindingObserver {
     // TODO: implement didChangeAppLifecycleState
     super.didChangeAppLifecycleState(state);
     if (state == AppLifecycleState.resumed) {
-      nowgps();
       loadStorage();
     }
   }
@@ -70,16 +71,29 @@ class _HomePageState extends State<mapPage> with WidgetsBindingObserver {
     tsunami = sp.getString("tsunami");
   }
 
-  Future<void> nowgps() async {
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    final String? lat = sp.getString("Latitude");
-    final String? long = sp.getString("Longitude");
+  //GPS관련 세팅
+  final LocationSettings locationSettings = LocationSettings(
+    accuracy: LocationAccuracy.high,
+    distanceFilter: 100,
+  );
 
-    setState(() {
-      _currentPosition = NLatLng(double.parse(lat!), double.parse(long!));
-    });
+  Future<void> _moveCamera() async {
+    if (_mapController != null) {
+      try {
+        Position position = await Geolocator.getCurrentPosition(locationSettings: locationSettings);
+        final cameraUpdate = NCameraUpdate.withParams(
+          target: NLatLng(
+              position.latitude, position.longitude),
+          bearing: 180,
+        );
+        await _mapController!.updateCamera(cameraUpdate);
+      } catch (e) {
+        print('카메라 이동 중 오류 발생: $e');
+      }
+    } else {
+      print('MapController가 초기화되지 않았습니다.');
+    }
   }
-
   //-----------데이터 불려오는 함수 끝--------------------------
 
   //-----------마커 이미지 불려오는 함수--------------------------
@@ -101,11 +115,23 @@ class _HomePageState extends State<mapPage> with WidgetsBindingObserver {
   }
   //-----------마커 이미지 불려오는 끝--------------------------
 
+  //-----------마커 눌루면 정보 불려오는 함수--------------------------
+  String _page_data = "";
+
+  void _page_data_item(allw) {
+    _page_data = allw;
+
+    setState(() {
+      _page_data = allw; // 조건 반전
+    });
+  }
+  //-----------마커 눌루면 정보 불려오는 함수 끝--------------------------
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        key: _scaffoldKey,
-        body: SafeArea(
+      key: _scaffoldKey,
+      body: SafeArea(
         // SafeArea로 화면 영역 보호
         child: Container(
           color: Color(0xfffafafa),
@@ -121,22 +147,36 @@ class _HomePageState extends State<mapPage> with WidgetsBindingObserver {
                         NaverMap(
                           options: NaverMapViewOptions(
                             locationButtonEnable: false,
-                            initialCameraPosition: NCameraPosition(
-                              target: _currentPosition ??
-                                  NLatLng(37.5666102, 126.9783881),
-                              zoom: 13,
-                            ),
                           ),
+                          onMapTapped: (point, latLng) {
+                            _toggleContainer(false);
+                          },
                           onMapReady: (controller) async {
-                            print("네이버 맵 로딩됨!");
+                            _mapController = controller; // 컨트롤러 초기화
+                            //GPS 모듈관련
+                            Position position =
+                                await Geolocator.getCurrentPosition(
+                                    locationSettings: locationSettings);
+                            //GPS 카메라 업데이트를 위한 함수
+                            final cameraUpdate = NCameraUpdate.withParams(
+                              target: NLatLng(
+                                  position.latitude, position.longitude),
+                              zoomBy: -2,
+                              bearing: 180,
+                            );
+                            //GPS 카메라 업데이트
+                            controller.updateCamera(cameraUpdate);
+                            //자기 핀을 찍기 위한 함수
                             controller.addOverlay(NMarker(
                               id: "1",
-                              position: _currentPosition,
+                              position: NLatLng(
+                                  position.latitude, position.longitude),
                               icon: NOverlayImage.fromAssetImage(
                                   'assets/my-location.png'),
                               size: Size(24, 24),
                             ));
 
+                            //지진에 관한 핀
                             var markerData = jsonDecode(earthquake!);
                             markerData = markerData["data"];
                             var count = 1;
@@ -148,14 +188,20 @@ class _HomePageState extends State<mapPage> with WidgetsBindingObserver {
                                 double.parse(item["attributes"]['ycord']),
                                 double.parse(item["attributes"]['xcord']),
                               );
-                              controller.addOverlay(NMarker(
+                              final marker = NMarker(
                                 id: count.toString(),
                                 position: position,
                                 icon: NOverlayImage.fromAssetImage(iconPath),
                                 size: Size(24, 24),
-                              ));
+                              );
+                              marker.setOnTapListener((NMarker marker) {
+                                print(item);
+                                _toggleContainer(true);
+                                _page_data_item(jsonEncode(item));
+                              });
+                              controller.addOverlay(marker);
                             }
-
+                            //쓰나미에 관한 핀
                             List<dynamic> tsunamid = jsonDecode(tsunami!);
                             for (var item in tsunamid) {
                               String iconPath = await selectedImage(
@@ -165,16 +211,21 @@ class _HomePageState extends State<mapPage> with WidgetsBindingObserver {
                                 double.parse(item["attributes"]['ycord']),
                                 double.parse(item["attributes"]['xcord']),
                               );
-                              controller.addOverlay(NMarker(
+                              final marker = NMarker(
                                 id: count.toString(),
                                 position: position,
                                 icon: NOverlayImage.fromAssetImage(iconPath),
                                 size: Size(24, 24),
-                              ));
+                              );
+                              marker.setOnTapListener((NMarker marker) {
+                                _toggleContainer(true);
+                                _page_data_item(jsonEncode(item));
+                              });
+                              controller.addOverlay(marker);
                             }
                           },
                         ),
-                        // 상단에 고정된 Container
+                        // 상단에 고정된바 Container
                         Positioned(
                           top: 0,
                           left: 0,
@@ -206,7 +257,8 @@ class _HomePageState extends State<mapPage> with WidgetsBindingObserver {
                                 ),
                                 Text(
                                   'ALL LIFE',
-                                  style: TextStyle(color: Colors.black, fontSize: 16.0),
+                                  style: TextStyle(
+                                      color: Colors.black, fontSize: 16.0),
                                 ),
                                 CircleAvatar(),
                               ],
@@ -257,19 +309,17 @@ class _HomePageState extends State<mapPage> with WidgetsBindingObserver {
                                             color: Colors.red,
                                             child: InkWell(
                                               splashColor: Colors.red,
-                                              onTap: () {},
+                                              onTap: () {
+                                                context.go("/community/message_center");
+                                              },
                                               child: Column(
                                                 mainAxisAlignment:
                                                     MainAxisAlignment.center,
                                                 children: <Widget>[
                                                   Text("재난문자",
-                                                      style: TextStyle(
-                                                          fontWeight:
-                                                              FontWeight.bold)),
+                                                      style: TextStyle(fontWeight: FontWeight.bold)),
                                                   Text("조회",
-                                                      style: TextStyle(
-                                                          fontWeight:
-                                                              FontWeight.bold)),
+                                                      style: TextStyle(fontWeight: FontWeight.bold)),
                                                 ],
                                               ),
                                             ),
@@ -278,15 +328,13 @@ class _HomePageState extends State<mapPage> with WidgetsBindingObserver {
                                       ),
                                       SizedBox(height: 20),
                                       FloatingActionButton(
-                                        onPressed: () {
-                                          // 의문이지만 작동 안됨
-                                        },
+                                        onPressed: _moveCamera,
                                         child: Icon(Icons.my_location),
                                       ),
                                     ],
                                   ),
                                 ),
-                                if (_showContainer)
+                                if (_showContainer == true)
                                   Container(
                                     decoration: BoxDecoration(
                                       color: Colors.white,
@@ -301,7 +349,7 @@ class _HomePageState extends State<mapPage> with WidgetsBindingObserver {
                                         0.3,
                                     child: TextButton(
                                       onPressed: () {},
-                                      child: Text("asdasd"),
+                                      child: _build_page(),
                                     ),
                                   ),
                               ],
@@ -330,7 +378,8 @@ class _HomePageState extends State<mapPage> with WidgetsBindingObserver {
                   children: [
                     _buildButton(0, Icons.home, "홈", false, '/'),
                     _buildButton(1, Icons.place, "지도 보기", true, '/map'),
-                    _buildButton(2, Icons.diversity_3, "커뮤니티", false, '/community/reivew'),
+                    _buildButton(2, Icons.diversity_3, "커뮤니티", false,
+                        '/community/reivew'),
                     _buildButton(3, Icons.account_circle, "계정", false, '/'),
                   ],
                 ),
@@ -338,163 +387,180 @@ class _HomePageState extends State<mapPage> with WidgetsBindingObserver {
             ],
           ),
         ),
-      ),      //윈쪽 메뉴 공개합니다
+      ), //윈쪽 메뉴 공개합니다
       drawer: Drawer(
           child: Container(
-            color: Colors.white,
-            child: Column(
-              children: [            //빈공간
-                Expanded(
-                  flex: 1,
-                  child: Container(
-                    height: 100,
-                  ),
-                ),
-                //메뉴 로그인 요소들
-                Expanded(
-                    flex: 8,
-                    child: Container(
-                      alignment: Alignment.centerLeft,
-                      margin: EdgeInsets.fromLTRB(20, 0, 20, 0),
-                      child: Column(
-                        children: [
-                          //=======================프로필 나타내는 구간========================
-                          Container(
-                              alignment: Alignment.centerLeft,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  CircleAvatar(
-                                    radius: 48, // Image radius
-                                    backgroundImage: NetworkImage('https://img2.sbs.co.kr/img/sbs_cms/VD/2014/10/13/VD19790540_w640_h360.jpg'),
-                                  ),
-                                  Container(height: 4),
-                                  Text("Test님", style: TextStyle(fontWeight: FontWeight.bold),),
-                                  Text("Test%Test.com")
-                                ],
-                              )
-
-                          ),
-                          //=======================프로필 나타내는 구간 끝========================
-
-
-                          //=======================버튼 나타내튼 구간========================
-                          //=======================지도========================
-                          Container(height: 20),
-                          SizedBox(
-                            width: 230, // 텍스트보다 큰 부모 위젯
-                            child: Align(
-                              alignment: Alignment.centerLeft, // 텍스트를 왼쪽으로 정렬
-                              child: Text('지도'),
-                            ),
-                          ),
-                          SizedBox(
-                            width: double.infinity * 0.3,
-                            child: TextButton.icon(
-                              onPressed: () => context.go("/map"),
-                              icon: const Icon(Icons.map),
-                              label: const Text('지도보기', style: TextStyle(fontWeight: FontWeight.bold),),
-                              style: TextButton.styleFrom(
-                                alignment: Alignment.centerLeft, // 왼쪽 정렬
-                              ),
-                            ),
-                          ),
-                          Divider(
-                            color: Colors.grey, // 선 색상
-                            thickness: 1, // 선 두께
-                            indent: 10, // 왼쪽 여백
-                            endIndent: 10, // 오른쪽 여백
-                          ),
-                          //=======================지도 끝========================
-                          //=======================커뮤니티========================
-                          Container(height: 7),
-                          SizedBox(
-                            width: 230, // 텍스트보다 큰 부모 위젯
-                            child: Align(
-                              alignment: Alignment.centerLeft, // 텍스트를 왼쪽으로 정렬
-                              child: Text('커뮤니티'),
-                            ),
-                          ),
-                          SizedBox(
-                            width: double.infinity * 0.3,
-                            child: TextButton.icon(
-                              onPressed: () {},
-                              icon: const Icon(Icons.warning),
-                              label: const Text('재난문자 보기', style: TextStyle(fontWeight: FontWeight.bold),),
-                              style: TextButton.styleFrom(
-                                alignment: Alignment.centerLeft, // 왼쪽 정렬
-                              ),
-                            ),
-                          ),
-                          Container(height: 5),
-                          SizedBox(
-                            width: double.infinity * 0.3,
-                            child: TextButton.icon(
-                              onPressed: () {},
-                              icon: const Icon(Icons.book),
-                              label: const Text('대피소 리뷰보기', style: TextStyle(fontWeight: FontWeight.bold),),
-                              style: TextButton.styleFrom(
-                                alignment: Alignment.centerLeft, // 왼쪽 정렬
-                              ),
-                            ),
-                          ),
-                          Container(height: 5),
-                          SizedBox(
-                            width: double.infinity * 0.3,
-                            child: TextButton.icon(
-                              onPressed: () {},
-                              icon: const Icon(Icons.edit),
-                              label: const Text('리뷰 수정및 작성하기', style: TextStyle(fontWeight: FontWeight.bold),),
-                              style: TextButton.styleFrom(
-                                alignment: Alignment.centerLeft, // 왼쪽 정렬
-                              ),
-                            ),
-                          ),
-                          Container(height: 5),
-                          Divider(
-                            color: Colors.grey, // 선 색상
-                            thickness: 1, // 선 두께
-                            indent: 10, // 왼쪽 여백
-                            endIndent: 10, // 오른쪽 여백
-                          ),
-                          //=======================커뮤니티 끝========================
-                          //=======================계정 및 설정 ========================
-                          Container(height: 5),
-                          SizedBox(
-                            width: 230, // 텍스트보다 큰 부모 위젯
-                            child: Align(
-                              alignment: Alignment.centerLeft, // 텍스트를 왼쪽으로 정렬
-                              child: Text('계정 및 설정'),
-                            ),
-                          ),
-                          Container(height: 5),
-                          SizedBox(
-                            width: double.infinity * 0.3,
-                            child: TextButton.icon(
-                              onPressed: () {},
-                              icon: const Icon(Icons.map),
-                              label: const Text('마이프로필', style: TextStyle(fontWeight: FontWeight.bold),),
-                              style: TextButton.styleFrom(
-                                alignment: Alignment.centerLeft, // 왼쪽 정렬
-                              ),
-                            ),
-                          )
-                          //=======================계정 및 설정 끝========================
-                          //=======================버튼 나타내튼 구간 끝========================
-                        ],
-                      ),
-                    )),
-                //빈공간
-                Expanded(
-                  flex: 1,
-                  child: Container(
-                    height: 100,
-                  ),
-                )
-              ],
+        color: Colors.white,
+        child: Column(
+          children: [
+            //빈공간
+            Expanded(
+              flex: 1,
+              child: Container(
+                height: 100,
+              ),
             ),
-          )
-      )
+            //메뉴 로그인 요소들
+            Expanded(
+                flex: 8,
+                child: Container(
+                  alignment: Alignment.centerLeft,
+                  margin: EdgeInsets.fromLTRB(20, 0, 20, 0),
+                  child: Column(
+                    children: [
+                      //=======================프로필 나타내는 구간========================
+                      Container(
+                          alignment: Alignment.centerLeft,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              CircleAvatar(
+                                radius: 48, // Image radius
+                                backgroundImage: NetworkImage(
+                                    'https://img2.sbs.co.kr/img/sbs_cms/VD/2014/10/13/VD19790540_w640_h360.jpg'),
+                              ),
+                              Container(height: 4),
+                              Text(
+                                "Test님",
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              Text("Test%Test.com")
+                            ],
+                          )),
+                      //=======================프로필 나타내는 구간 끝========================
+                      //=======================버튼 나타내튼 구간========================
+                      //=======================지도========================
+                      Container(height: 20),
+                      SizedBox(
+                        width: 230, // 텍스트보다 큰 부모 위젯
+                        child: Align(
+                          alignment: Alignment.centerLeft, // 텍스트를 왼쪽으로 정렬
+                          child: Text('지도'),
+                        ),
+                      ),
+                      SizedBox(
+                        width: double.infinity * 0.3,
+                        child: TextButton.icon(
+                          onPressed: () => context.go("/map"),
+                          icon: const Icon(Icons.map),
+                          label: const Text(
+                            '지도보기',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          style: TextButton.styleFrom(
+                            alignment: Alignment.centerLeft, // 왼쪽 정렬
+                          ),
+                        ),
+                      ),
+                      Divider(
+                        color: Colors.grey, // 선 색상
+                        thickness: 1, // 선 두께
+                        indent: 10, // 왼쪽 여백
+                        endIndent: 10, // 오른쪽 여백
+                      ),
+                      //=======================지도 끝========================
+                      //=======================커뮤니티========================
+                      Container(height: 7),
+                      SizedBox(
+                        width: 230, // 텍스트보다 큰 부모 위젯
+                        child: Align(
+                          alignment: Alignment.centerLeft, // 텍스트를 왼쪽으로 정렬
+                          child: Text('커뮤니티'),
+                        ),
+                      ),
+                      SizedBox(
+                        width: double.infinity * 0.3,
+                        child: TextButton.icon(
+                          onPressed: () =>
+                              context.go("/community/message-center"),
+                          icon: const Icon(Icons.warning),
+                          label: const Text(
+                            '재난문자 보기',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          style: TextButton.styleFrom(
+                            alignment: Alignment.centerLeft, // 왼쪽 정렬
+                          ),
+                        ),
+                      ),
+                      Container(height: 5),
+                      SizedBox(
+                        width: double.infinity * 0.3,
+                        child: TextButton.icon(
+                          onPressed: () => context.go("/community/reivew"),
+                          icon: const Icon(Icons.book),
+                          label: const Text(
+                            '대피소 리뷰보기',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          style: TextButton.styleFrom(
+                            alignment: Alignment.centerLeft, // 왼쪽 정렬
+                          ),
+                        ),
+                      ),
+                      Container(height: 5),
+                      SizedBox(
+                        width: double.infinity * 0.3,
+                        child: TextButton.icon(
+                          onPressed: () =>
+                              context.go("/community/review_create"),
+                          icon: const Icon(Icons.edit),
+                          label: const Text(
+                            '리뷰 수정및 작성하기',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          style: TextButton.styleFrom(
+                            alignment: Alignment.centerLeft, // 왼쪽 정렬
+                          ),
+                        ),
+                      ),
+                      Container(height: 5),
+                      Divider(
+                        color: Colors.grey, // 선 색상
+                        thickness: 1, // 선 두께
+                        indent: 10, // 왼쪽 여백
+                        endIndent: 10, // 오른쪽 여백
+                      ),
+                      //=======================커뮤니티 끝========================
+                      //=======================계정 및 설정 ========================
+                      Container(height: 5),
+                      SizedBox(
+                        width: 230, // 텍스트보다 큰 부모 위젯
+                        child: Align(
+                          alignment: Alignment.centerLeft, // 텍스트를 왼쪽으로 정렬
+                          child: Text('계정 및 설정'),
+                        ),
+                      ),
+                      Container(height: 5),
+                      SizedBox(
+                        width: double.infinity * 0.3,
+                        child: TextButton.icon(
+                          onPressed: () {},
+                          icon: const Icon(Icons.map),
+                          label: const Text(
+                            '마이프로필',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          style: TextButton.styleFrom(
+                            alignment: Alignment.centerLeft, // 왼쪽 정렬
+                          ),
+                        ),
+                      )
+                      //=======================계정 및 설정 끝========================
+                      //=======================버튼 나타내튼 구간 끝========================
+                    ],
+                  ),
+                )),
+            //빈공간
+            Expanded(
+              flex: 1,
+              child: Container(
+                height: 100,
+              ),
+            )
+          ],
+        ),
+      )),
     );
   }
 
@@ -525,5 +591,15 @@ class _HomePageState extends State<mapPage> with WidgetsBindingObserver {
         ),
       ),
     );
+  }
+
+  Widget _build_page(){
+    Map<String, dynamic> userMap = jsonDecode(_page_data);
+
+    return Padding(
+      padding:  EdgeInsets.only(top: 10),
+      child: Text(_page_data),
+    );
+
   }
 }

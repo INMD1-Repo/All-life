@@ -17,16 +17,16 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
 
-  FlutterNativeSplash.preserve(
-      widgetsBinding: WidgetsFlutterBinding.ensureInitialized());
+  FlutterNativeSplash.preserve(widgetsBinding: WidgetsFlutterBinding.ensureInitialized());
 
   // 권한 요청
   await _requestLocationPermission();
   await NaverMapSdk.instance.initialize(
-      clientId: dotenv.get('Client_ID'),
-      onAuthFailed: (ex) {
-        print("********* 네이버맵 인증오류 : $ex *********");
-      });
+    clientId: dotenv.get('Client_ID'),
+    onAuthFailed: (ex) {
+      print("********* 네이버맵 인증오류 : $ex *********");
+    },
+  );
 
   // 앱 초기에 위치 가져오기 저장하기
   Get_GPS(dotenv.get('Client_ID'), dotenv.get('Client_Secret'));
@@ -47,14 +47,16 @@ Future<void> _requestLocationPermission() async {
   }
 }
 
-final LocationSettings locationSettings =
-LocationSettings(accuracy: LocationAccuracy.high, distanceFilter: 100);
+final LocationSettings locationSettings = LocationSettings(
+  accuracy: LocationAccuracy.high,
+  distanceFilter: 100,
+);
 
+// GPS 정보 가져오기
 void Get_GPS(String Client_ID, String Client_Secret) async {
   print("GPS 데이터 가져오기 성공");
   SharedPreferences sp = await SharedPreferences.getInstance();
-  Position position =
-  await Geolocator.getCurrentPosition(locationSettings: locationSettings);
+  Position position = await Geolocator.getCurrentPosition(locationSettings: locationSettings);
   await sp.setString("Latitude", position.latitude.toString());
   await sp.setString("Longitude", position.longitude.toString());
   final String? lat = sp.getString("Latitude");
@@ -66,37 +68,70 @@ void Get_GPS(String Client_ID, String Client_Secret) async {
     "X-NCP-APIGW-API-KEY": Client_Secret,
   };
 
-  final Uri url = Uri.parse(dotenv.get('GPS_Domain') +
-      "gc?coords=$long,$lat&orders=addr&output=json");
+  final Uri url = Uri.parse(dotenv.get('GPS_Domain') + "gc?coords=$long,$lat&orders=addr&output=json");
   final http.Response req = await http.get(url, headers: headers_text);
 
   // json 저장
   await sp.setString("locationjson", req.body);
 }
 
+// 로딩 상태가 있는 페이지 로더
+class PageLoader extends StatelessWidget {
+  final Future<void> future;
+  final WidgetBuilder builder;
+
+  const PageLoader({required this.future, required this.builder});
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<void>(
+      future: future,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const LoadingPage();  // 로딩 스피너 표시
+        } else if (snapshot.hasError) {
+          return Scaffold(
+            body: Center(child: Text('Error: ${snapshot.error}')),
+          );
+        } else {
+          return builder(context);  // 로딩 완료 후 페이지 전환
+        }
+      },
+    );
+  }
+}
+
 // GoRouter 설정
 final GoRouter _router = GoRouter(
   routes: [
-    // 초기 경로에 해당하는 페이지
-    GoRoute(path: '/', builder: (context, state) => HomePage()),
-    // 지도 페이지
-    GoRoute(path: '/map', builder: (context, state) => mapPage()),
-    //커뮤티티 페이지
-    GoRoute(path: '/community/review_create', builder: (context, state) => review_create()),
-    GoRoute(path: '/community/message_center', builder: (context, state) => message_center()),
-    GoRoute(path: '/community/reivew', builder: (context, state) => reivew()),
+    GoRoute(path: '/', builder: (context, state) => const HomePage()),
+
+    // 로딩을 포함한 페이지 전환 예시
+    GoRoute(
+      path: '/map',
+      builder: (context, state) => PageLoader(
+        future: _fetchMapData(),  // 로딩할 작업을 여기에 지정
+        builder: (context) => const mapPage(),
+      ),
+    ),
+    GoRoute(path: '/community/review_create', builder: (context, state) => const review_create()),
+    GoRoute(path: '/community/message_center', builder: (context, state) => const message_center()),
+    GoRoute(path: '/community/reivew', builder: (context, state) => const reivew()),
+
     // 추가 경로를 여기에 정의
   ],
-  // 경로 오류 시 보여줄 페이지
-  errorBuilder: (context, state) => ErrorPage(),
+  errorBuilder: (context, state) => const ErrorPage(),
 );
 
+// 오류 페이지
 class ErrorPage extends StatelessWidget {
+  const ErrorPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Error')),
-      body: Center(child: Text('Page not found')),
+      appBar: AppBar(title: const Text('Error')),
+      body: const Center(child: Text('Page not found')),
     );
   }
 }
@@ -107,13 +142,30 @@ class ALLlife extends StatelessWidget {
     return MaterialApp.router(
       title: 'ALL-Life',
       theme: ThemeData(
-        iconTheme: IconThemeData(color: Colors.black), // Set icon color
+        iconTheme: const IconThemeData(color: Colors.black),  // 아이콘 색상
         textButtonTheme: TextButtonThemeData(
-          style: TextButton.styleFrom(foregroundColor: Colors.black), // Set text button color
+          style: TextButton.styleFrom(foregroundColor: Colors.black),  // 버튼 색상
         ),
       ),
-      routerConfig: _router, // GoRouter 라우터 사용
+      routerConfig: _router,  // GoRouter 사용
     );
   }
 }
 
+class LoadingPage extends StatelessWidget {
+  const LoadingPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: Center(
+        child: CircularProgressIndicator(),  // 로딩 스피너
+      ),
+    );
+  }
+}
+
+// 네이버 맵 데이터를 가져오는 함수
+Future<void> _fetchMapData() async {
+  await Future.delayed(const Duration(seconds: 2));  // 2초간 딜레이 (데이터 로딩 시뮬레이션)
+}
