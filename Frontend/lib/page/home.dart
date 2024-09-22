@@ -16,6 +16,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   String? test;
   String? earthquake;
   String? tsunami;
+  String? default_card;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
@@ -62,6 +63,13 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     final req_s = await http.get(Url_s);
     tsunami = req_s.body;
     sp.setString("tsunami_shelter", req_s.body);
+
+    //자체제작한 API에서 가지고 대피소 정보를 가지고옴
+    final Url_d = Uri.parse(
+        "http://hackton.powerinmd.com/api/cooling-centers/?filters[areaNm][\$contains]=$city $dong");
+    final req_d = await http.get(Url_d);
+    default_card = req_d.body;
+    sp.setString("default_card", req_s.body);
 
     _list_card();
     setState(() {
@@ -218,19 +226,20 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold),
                                 ),
-                                Padding(
-                                    padding: EdgeInsets.all(20),
-                                    child: Container(
-                                      width: double.infinity,
-                                      height: 150,
-                                      decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(20),
-                                          color: Color(0xfff6f6f6)),
-                                      child: Center(
-                                        child: Text("서비스 준비중입니다."),
+
+                                  Container(
+                                    width: double.infinity,
+                                    height: 150,
+                                    child: Center(
+                                      child: SingleChildScrollView(
+                                        scrollDirection: Axis.horizontal,
+                                        child: Row(
+                                          children: [_list_default_card()],
+                                        ),
                                       ),
-                                    ))
+                                    ),
+                                  ),
+
                               ],
                             ),
                           ),
@@ -340,7 +349,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                   children: [
                     _buildButton(0, Icons.home, "홈", true, '/'),
                     _buildButton(1, Icons.place, "지도 보기", false, '/map'),
-                    _buildButton(2, Icons.diversity_3, "커뮤니티", false, '/community/reivew'),
+                    _buildButton(2, Icons.diversity_3, "커뮤니티", false,
+                        '/community/reivew'),
                     _buildButton(3, Icons.account_circle, "계정", false, '/'),
                   ],
                 ),
@@ -579,14 +589,14 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       }
       for (int i = 0; i < json.length; i++) {
         //장소에 따라 이미지가 다르게 설정
-        if(json[i]["attributes"]["acmdfclty_se_nm"] == "공원"){
+        if (json[i]["attributes"]["acmdfclty_se_nm"] == "공원") {
           filepath = 'assets/cardinsert/city.png';
-        }else if(json[i]["attributes"]["acmdfclty_se_nm"] == "공설(종합)운동장"){
+        } else if (json[i]["attributes"]["acmdfclty_se_nm"] == "공설(종합)운동장") {
           filepath = 'assets/cardinsert/park.png';
-        }else{
+        } else {
           filepath = 'assets/cardinsert/default.jpg';
         }
-        
+
         row.children.add(Container(
           width: 400,
           height: 150,
@@ -594,7 +604,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               clipBehavior: Clip.antiAlias,
               child: Column(
                 children: [
-
                   Image.asset(filepath,
                       fit: BoxFit.cover, width: double.infinity, height: 60),
                   ListTile(
@@ -625,6 +634,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   //리스트 만들어주는 메서드 해일대피시설
   _list_sea_card() {
+    String filepath = 'assets/cardinsert/default.png';
     Row row = Row(children: []);
     try {
       var json = jsonDecode(tsunami!);
@@ -643,6 +653,14 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         return row;
       }
       for (int i = 0; i < json.length; i++) {
+        //장소에 따라 이미지가 다르게 설정
+        if (json[i]["attributes"]["acmdfclty_se_nm"] == "공원") {
+          filepath = 'assets/cardinsert/city.png';
+        } else if (json[i]["attributes"]["acmdfclty_se_nm"] == "공설(종합)운동장") {
+          filepath = 'assets/cardinsert/park.png';
+        } else {
+          filepath = 'assets/cardinsert/default.jpg';
+        }
         row.children.add(Container(
           width: 400,
           height: 150,
@@ -650,7 +668,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               clipBehavior: Clip.antiAlias,
               child: Column(
                 children: [
-                  Image.network('https://picsum.photos/250?image=9',
+                  Image.asset(filepath,
                       fit: BoxFit.cover, width: double.infinity, height: 60),
                   ListTile(
                     title: Text(
@@ -677,5 +695,66 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       return row;
     }
   }
-//리스트 만들어주는 메서드 기타 대피 시설
+
+  //리스트 만들어주는 메서드 기타 대피 시설
+  _list_default_card() {
+    String filepath = 'assets/cardinsert/default.png';
+    Row row = Row(children: []);
+    try {
+      var json = jsonDecode(default_card!);
+      json = json["data"];
+      if (json.length == 0 || json.length! == null) {
+        row.children.add(Container(
+          width: 360,
+          height: 150,
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              color: Color(0xfff6f6f6)),
+          child: Center(
+            child: Text("조회된 내용이 없습니다."),
+          ),
+        ));
+        return row;
+      }
+      for (int i = 0; i < json.length; i++) {
+        if (json[i]["attributes"]["acmdfclty_se_nm"] == "공원") {
+          filepath = 'assets/cardinsert/city.png';
+        } else if (json[i]["attributes"]["acmdfclty_se_nm"] == "공설(종합)운동장") {
+          filepath = 'assets/cardinsert/park.png';
+        } else {
+          filepath = 'assets/cardinsert/default.jpg';
+        }
+        row.children.add(Container(
+          width: 400,
+          height: 150,
+          child: Card(
+              clipBehavior: Clip.antiAlias,
+              child: Column(
+                children: [
+                  Image.asset(filepath,
+                      fit: BoxFit.cover, width: double.infinity, height: 60),
+                  ListTile(
+                    title: Text(json[i]["attributes"]["restname"].toString(),
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    subtitle:
+                        Text(json[i]["attributes"]["restaddr"].toString(), style: TextStyle(fontSize: 11),),
+                  )
+                ],
+              )),
+        ));
+      }
+      return row;
+    } catch (error) {
+      row.children.add(Container(
+        width: 360,
+        height: 150,
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20), color: Color(0xfff6f6f6)),
+        child: Center(
+          child: Text("서비스를 지원하지 않는 지역입니다.."),
+        ),
+      ));
+      return row;
+    }
+  }
 }
