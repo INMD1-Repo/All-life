@@ -82,6 +82,10 @@ flutter:
      - assets/mapicon/tsunami1.png
      - assets/mapicon/tsunami2.png
      - assets/mapicon/tsunami4.png
+     - assets/map_test_map.jpg
+     - assets/cardinsert/city.png
+     - assets/cardinsert/default.jpg
+     - assets/cardinsert/park.png
 
 flutter_native_splash:
   android: true

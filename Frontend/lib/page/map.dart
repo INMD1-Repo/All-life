@@ -14,9 +14,46 @@ class mapPage extends StatefulWidget {
   _mapPageState createState() => _mapPageState();
 }
 
+class StarRating extends StatelessWidget {
+  final double rating;
+  final int totalStars;
+
+  const StarRating({Key? key, required this.rating, this.totalStars = 5})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(totalStars, (index) {
+        if (index < rating.floor()) {
+          // 채워진 별 (Full star)
+          return const Icon(
+            Icons.star,
+            color: Colors.amber,
+          );
+        } else if (index < rating && rating - index > 0.5) {
+          // 반 별 (Half star)
+          return const Icon(
+            Icons.star_half,
+            color: Colors.amber,
+          );
+        } else {
+          // 빈 별 (Empty star)
+          return const Icon(
+            Icons.star_border,
+            color: Colors.amber,
+          );
+        }
+      }),
+    );
+  }
+}
+
 class _mapPageState extends State<mapPage> with WidgetsBindingObserver {
   String? earthquake;
   String? tsunami;
+  String? userdata;
 
   NaverMapController? _mapController; // NaverMapController 선언
 
@@ -34,6 +71,7 @@ class _mapPageState extends State<mapPage> with WidgetsBindingObserver {
       print("Fragment Activity를 시작하는 중 오류 발생: ${e.message}");
     }
   }
+
   //유동성을 위한 함수
   void _toggleContainer(allw) {
     setState(() {
@@ -69,6 +107,7 @@ class _mapPageState extends State<mapPage> with WidgetsBindingObserver {
     SharedPreferences sp = await SharedPreferences.getInstance();
     earthquake = sp.getString("earthquake_json");
     tsunami = sp.getString("tsunami");
+    userdata = sp.getString("loginInfo");
   }
 
   //GPS관련 세팅
@@ -80,10 +119,10 @@ class _mapPageState extends State<mapPage> with WidgetsBindingObserver {
   Future<void> _moveCamera() async {
     if (_mapController != null) {
       try {
-        Position position = await Geolocator.getCurrentPosition(locationSettings: locationSettings);
+        Position position = await Geolocator.getCurrentPosition(
+            locationSettings: locationSettings);
         final cameraUpdate = NCameraUpdate.withParams(
-          target: NLatLng(
-              position.latitude, position.longitude),
+          target: NLatLng(position.latitude, position.longitude),
           bearing: 180,
         );
         await _mapController!.updateCamera(cameraUpdate);
@@ -94,6 +133,7 @@ class _mapPageState extends State<mapPage> with WidgetsBindingObserver {
       print('MapController가 초기화되지 않았습니다.');
     }
   }
+
   //-----------데이터 불려오는 함수 끝--------------------------
 
   //-----------마커 이미지 불려오는 함수--------------------------
@@ -113,6 +153,7 @@ class _mapPageState extends State<mapPage> with WidgetsBindingObserver {
       return basePath + "0.png";
     }
   }
+
   //-----------마커 이미지 불려오는 끝--------------------------
 
   //-----------마커 눌루면 정보 불려오는 함수--------------------------
@@ -125,6 +166,7 @@ class _mapPageState extends State<mapPage> with WidgetsBindingObserver {
       _page_data = allw; // 조건 반전
     });
   }
+
   //-----------마커 눌루면 정보 불려오는 함수 끝--------------------------
 
   @override
@@ -310,16 +352,23 @@ class _mapPageState extends State<mapPage> with WidgetsBindingObserver {
                                             child: InkWell(
                                               splashColor: Colors.red,
                                               onTap: () {
-                                                context.go("/community/message_center");
+                                                context.go(
+                                                    "/community/message_center");
                                               },
                                               child: Column(
                                                 mainAxisAlignment:
                                                     MainAxisAlignment.center,
                                                 children: <Widget>[
                                                   Text("재난문자",
-                                                      style: TextStyle(fontWeight: FontWeight.bold)),
+                                                      style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          fontSize: 13)),
                                                   Text("조회",
-                                                      style: TextStyle(fontWeight: FontWeight.bold)),
+                                                      style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          fontSize: 13)),
                                                 ],
                                               ),
                                             ),
@@ -347,10 +396,7 @@ class _mapPageState extends State<mapPage> with WidgetsBindingObserver {
                                         MediaQuery.of(context).size.width * 1,
                                     height: MediaQuery.of(context).size.height *
                                         0.3,
-                                    child: TextButton(
-                                      onPressed: () {},
-                                      child: _build_page(),
-                                    ),
+                                    child: _build_page(),
                                   ),
                               ],
                             ),
@@ -593,13 +639,108 @@ class _mapPageState extends State<mapPage> with WidgetsBindingObserver {
     );
   }
 
-  Widget _build_page(){
+  Widget _build_page() {
     Map<String, dynamic> userMap = jsonDecode(_page_data);
-
+    Map<String, dynamic> userinfo = jsonDecode(userdata!);
+    double rating_text = userMap["attributes"]['rating'].toDouble();
+    String type = "";
+    if (userMap["attributes"]['Type'] == "001") {
+      type = "지진대피소";
+    } else {
+      type = "해일대피소";
+    }
     return Padding(
-      padding:  EdgeInsets.only(top: 10),
-      child: Text(_page_data),
-    );
+        padding: EdgeInsets.all(16),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text("현재 선택하신 장소 정보",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+          Container(
+            padding: EdgeInsets.fromLTRB(0, 8, 0, 0),
+            child: Row(
+              children: [
+                Expanded(
+                    flex: 2,
+                    child: Container(
+                      child: Image.asset("assets/map_test_map.jpg"),
+                    )),
+                Expanded(
+                  flex: 4,
+                  child: Container(
+                    height: 191,
+                    padding: EdgeInsets.fromLTRB(20, 0, 0, 0),
+                    // 패딩 수정 (상단 20 제거)
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start, // 상단 정렬
+                        children: [
+                          Text(userMap["attributes"]['vt_acmdfclty_nm'],
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 25)),
+                          Text(userMap["attributes"]['dtl_adres'],
+                              style: TextStyle(fontSize: 15)),
 
+                          Text("분류: " + type, style: TextStyle(fontSize: 10)),
+                          Text("평점", style: TextStyle(fontSize: 15)),
+                          //별점 표시
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            // 세로 중앙 정렬
+                            children: [
+                              StarRating(rating: rating_text),
+                              Container(width: 70),
+                              Text(
+                                rating_text.toString(),
+                                style: TextStyle(fontSize: 16),
+                              ) // 별점 표시
+                            ],
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              if (userinfo['login'] == 0) {
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return AlertDialog(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(10.0),
+                                      ),
+                                      title: Column(
+                                        children: const [
+                                          Text("로그인이 안되어 있습니다",
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.bold)),
+                                        ],
+                                      ),
+                                      content: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text("아래버튼을 눌려서 로그인을 해주시기 바람니다.")
+                                        ],
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                            onPressed: () {},
+                                            child: Text("로그인"))
+                                      ],
+                                    );
+                                  },
+                                );
+                              }
+                            },
+                            child: const Text(
+                              "장소 평가",
+                              style: TextStyle(fontSize: 14),
+                            ),
+                          )
+                        ]),
+                  ),
+                )
+              ],
+            ),
+          )
+        ]));
   }
 }

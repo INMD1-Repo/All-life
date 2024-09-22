@@ -557,6 +557,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   //리스트 만들어주는 메서드 지진대피시설
   _list_card() {
+    //사진 파일 선언
+    String filepath = 'assets/cardinsert/default.png';
+
     Row row = Row(children: []);
     try {
       var json = jsonDecode(earthquake!);
@@ -575,6 +578,15 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         return row;
       }
       for (int i = 0; i < json.length; i++) {
+        //장소에 따라 이미지가 다르게 설정
+        if(json[i]["attributes"]["acmdfclty_se_nm"] == "공원"){
+          filepath = 'assets/cardinsert/city.png';
+        }else if(json[i]["attributes"]["acmdfclty_se_nm"] == "공설(종합)운동장"){
+          filepath = 'assets/cardinsert/park.png';
+        }else{
+          filepath = 'assets/cardinsert/default.jpg';
+        }
+        
         row.children.add(Container(
           width: 400,
           height: 150,
@@ -582,7 +594,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               clipBehavior: Clip.antiAlias,
               child: Column(
                 children: [
-                  Image.network('https://picsum.photos/250?image=9',
+
+                  Image.asset(filepath,
                       fit: BoxFit.cover, width: double.infinity, height: 60),
                   ListTile(
                     title: Text(

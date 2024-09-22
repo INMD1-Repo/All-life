@@ -73,6 +73,12 @@ void Get_GPS(String Client_ID, String Client_Secret) async {
 
   // json 저장
   await sp.setString("locationjson", req.body);
+  //처음에만 로그인을 저장하는 내부데이터를 구현한다.
+  if(await sp.getString("loginInfo") == null){
+    await sp.setString("loginInfo", '{"login":0,"token":"","refreshtoken":""}');
+    print("처음이라서 로그인 관련객체 생성됨");
+  }
+ 
 }
 
 // 로딩 상태가 있는 페이지 로더
