@@ -203,8 +203,9 @@ class _mapPageState extends State<mapPage> with WidgetsBindingObserver {
                             final cameraUpdate = NCameraUpdate.withParams(
                               target: NLatLng(
                                   position.latitude, position.longitude),
-                              zoomBy: -2,
-                              bearing: 180,
+                              zoomBy: 0.4,
+                              bearing: 0
+
                             );
                             //GPS 카메라 업데이트
                             controller.updateCamera(cameraUpdate);
@@ -722,7 +723,7 @@ class _mapPageState extends State<mapPage> with WidgetsBindingObserver {
                                       ),
                                       actions: [
                                         TextButton(
-                                            onPressed: () {},
+                                            onPressed: () {context.go("/community/review_create");},
                                             child: Text("로그인"))
                                       ],
                                     );

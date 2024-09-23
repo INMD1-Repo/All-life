@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:go_router/go_router.dart';
 
 class review_create extends StatefulWidget {
@@ -12,6 +13,7 @@ class review_create extends StatefulWidget {
 class _review_createtate extends State<review_create>
     with WidgetsBindingObserver {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  double _rating = 0; // 초기 평점
 
   @override
   Widget build(BuildContext context) {
@@ -62,33 +64,229 @@ class _review_createtate extends State<review_create>
               // 콘텐츠 부분
               Expanded(
                 flex: 8,
-                child: Container(),
+                child: Container(
+                  padding: EdgeInsets.fromLTRB(30, 20, 30, 0), // 오른쪽 padding 추가
+                  alignment: Alignment.centerLeft,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "대피장소 평가",
+                        style: TextStyle(
+                            fontSize: 30, fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        "본 질문에 만족하지 않는 항목은 체크하지 말아주세요.",
+                        style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey),
+                      ),
+                      SizedBox(height: 30),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        //----------------선택창 부분-----------------------
+                        padding: EdgeInsets.all(10), // 추가적인 padding
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start, // 상단 정렬
+                          children: [
+                            Transform.scale(
+                              scale: 1.4,
+                              child: Checkbox(value: false, onChanged: null),
+                            ),
+                            Expanded(
+                              child: Text(
+                                "수용가능 인원대비 생필품 재고는 충분히 구비되어 있는가?",
+                                maxLines: 2, // 최대 두 줄로 제한
+                                overflow: TextOverflow.ellipsis, // 글자가 넘치면 생략
+                                style: TextStyle(
+                                  fontSize: 17.0,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        padding: EdgeInsets.all(10), // 추가적인 padding
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start, // 상단 정렬
+                          children: [
+                            Transform.scale(
+                              scale: 1.4,
+                              child: Checkbox(value: false, onChanged: null),
+                            ),
+                            Expanded(
+                              child: Text(
+                                "대피소는 상시 개발을 준수는하고 있는 가?",
+                                maxLines: 2, // 최대 두 줄로 제한
+                                overflow: TextOverflow.ellipsis, // 글자가 넘치면 생략
+                                style: TextStyle(
+                                  fontSize: 17.0,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        padding: EdgeInsets.all(10), // 추가적인 padding
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start, // 상단 정렬
+                          children: [
+                            Transform.scale(
+                              scale: 1.4,
+                              child: Checkbox(value: false, onChanged: null),
+                            ),
+                            Expanded(
+                              child: Text(
+                                "용도에 맞게 사용되고 있는가?",
+                                maxLines: 1, // 최대 두 줄로 제한
+                                overflow: TextOverflow.ellipsis, // 글자가 넘치면 생략
+                                style: TextStyle(
+                                  fontSize: 17.0,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        padding: EdgeInsets.all(10), // 추가적인 padding
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start, // 상단 정렬
+                          children: [
+                            Transform.scale(
+                              scale: 1.4,
+                              child: Checkbox(value: false, onChanged: null),
+                            ),
+                            Expanded(
+                              child: Text(
+                                "건물대치자는 대피소의 정확한 위치를 알고 있는가?",
+                                maxLines: 2, // 최대 두 줄로 제한
+                                overflow: TextOverflow.ellipsis, // 글자가 넘치면 생략
+                                style: TextStyle(
+                                  fontSize: 17.0,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      //----------------선택창 부분 끝-----------------------
+                      //평점 부분
+                      Padding(
+                        padding: EdgeInsets.fromLTRB(20, 20, 20, 2),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text("평점  $_rating",
+                                style: TextStyle(
+                                    fontSize: 25.0,
+                                    fontWeight: FontWeight.bold)),
+                            Container(height: 10),
+                            Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  // Rating Bar
+                                  RatingBar.builder(
+                                    initialRating: 0,
+                                    minRating: 1,
+                                    direction: Axis.horizontal,
+                                    allowHalfRating: true,
+                                    // 반개 별 허용
+                                    itemCount: 5,
+                                    // 별 개수
+                                    itemPadding:
+                                        EdgeInsets.symmetric(horizontal: 4.0),
+                                    itemBuilder: (context, _) => Icon(
+                                      Icons.star,
+                                      color: Colors.amber, // 별 색상
+                                    ),
+                                    onRatingUpdate: (rating) {
+                                      setState(() {
+                                        _rating = rating; // 별을 선택하면 평점이 업데이트됨
+                                      });
+                                    },
+                                  ),
+                                  SizedBox(height: 20),
+                                  // 평점 숫자로 표시
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                        height: 50,
+                        width: double.infinity,
+                        child: TextButton(
+                          child: Text("제출", style: TextStyle(color: Colors.white, fontSize: 20),),
+                          onPressed: () {},
+                          style: ButtonStyle(
+                              backgroundColor:
+                                  MaterialStateProperty.all(Colors.green),
+                              shape: MaterialStateProperty.all<
+                                      RoundedRectangleBorder>(
+                                  RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(5)))),
+                        ),
+                      )
+                    ],
+                  ),
+                ),
               ),
               // 하단 메뉴 부분
-              Container(
-                height: 80,
-                decoration: BoxDecoration(
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.5),
-                      spreadRadius: 5,
-                      blurRadius: 7,
-                      offset: Offset(0, 3),
-                    )
-                  ],
-                  color: Color(0xffF4F4F4),
+              Expanded(
+                flex: 1,
+                child: Container(
+                  height: 80,
+                  decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.5),
+                        spreadRadius: 5,
+                        blurRadius: 7,
+                        offset: Offset(0, 3),
+                      )
+                    ],
+                    color: Color(0xffF4F4F4),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _buildButton(0, Icons.home, "홈", false, '/'),
+                      _buildButton(1, Icons.place, "지도 보기", false, '/map'),
+                      _buildButton(2, Icons.diversity_3, "커뮤니티", true,
+                          '/community/reivew'),
+                      _buildButton(3, Icons.account_circle, "계정", false, '/'),
+                    ],
+                  ),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _buildButton(0, Icons.home, "홈", false, '/'),
-                    _buildButton(1, Icons.place, "지도 보기", false, '/map'),
-                    _buildButton(2, Icons.diversity_3, "커뮤니티", true,
-                        '/community/reivew'),
-                    _buildButton(3, Icons.account_circle, "계정", false, '/'),
-                  ],
-                ),
-              ),
+              )
             ],
           ),
         ),

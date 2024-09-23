@@ -49,7 +49,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         jsonDecode(data!)["results"][0]["region"]["area2"]["name"].toString();
     String dong =
         jsonDecode(data!)["results"][0]["region"]["area3"]["name"].toString();
-
     //자체제작한 API에서 가지고 대피소 정보를 가지고옴
     final Url = Uri.parse(
         'http://hackton.powerinmd.com/api/earthquake-shelters?filters[dtl_adres][\$contains]=$city $dong');
@@ -63,7 +62,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     final req_s = await http.get(Url_s);
     tsunami = req_s.body;
     sp.setString("tsunami_shelter", req_s.body);
-
+    //최신자료 반영
+    if(city =="김해시"){
+      dong = "내외동";
+    }
     //자체제작한 API에서 가지고 대피소 정보를 가지고옴
     final Url_d = Uri.parse(
         "http://hackton.powerinmd.com/api/cooling-centers/?filters[areaNm][\$contains]=$city $dong");
@@ -128,7 +130,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 flex: 8,
                 child: Container(
                   child: Padding(
-                    padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                    padding: EdgeInsets.fromLTRB(20, 0,20, 0),
                     child: SingleChildScrollView(
                       // Make the content scrollable
                       child: Column(
@@ -351,7 +353,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                     _buildButton(1, Icons.place, "지도 보기", false, '/map'),
                     _buildButton(2, Icons.diversity_3, "커뮤니티", false,
                         '/community/reivew'),
-                    _buildButton(3, Icons.account_circle, "계정", false, '/'),
+                    _buildButton(3, Icons.account_circle, "계정", false, '/community/review_create'),
                   ],
                 ),
               ),
@@ -576,7 +578,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       json = json["data"];
       if (json.length == 0 || json.length! == null) {
         row.children.add(Container(
-          width: 400,
+          width: 350,
           height: 150,
           decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
@@ -598,7 +600,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         }
 
         row.children.add(Container(
-          width: 400,
+          width: 350,
           height: 150,
           child: Card(
               clipBehavior: Clip.antiAlias,
@@ -620,7 +622,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       return row;
     } catch (error) {
       row.children.add(Container(
-        width: 400,
+        width: 350,
         height: 150,
         decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20), color: Color(0xfff6f6f6)),
@@ -641,7 +643,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       json = json["data"];
       if (json.length == 0 || json.length! == null) {
         row.children.add(Container(
-          width: 400,
+          width: 350,
           height: 150,
           decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
@@ -662,7 +664,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           filepath = 'assets/cardinsert/default.jpg';
         }
         row.children.add(Container(
-          width: 400,
+          width: 350,
           height: 150,
           child: Card(
               clipBehavior: Clip.antiAlias,
@@ -684,7 +686,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       return row;
     } catch (error) {
       row.children.add(Container(
-        width: 400,
+        width: 350,
         height: 150,
         decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20), color: Color(0xfff6f6f6)),
@@ -705,7 +707,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       json = json["data"];
       if (json.length == 0 || json.length! == null) {
         row.children.add(Container(
-          width: 360,
+          width: 350,
           height: 150,
           decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
@@ -725,7 +727,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           filepath = 'assets/cardinsert/default.jpg';
         }
         row.children.add(Container(
-          width: 400,
+          width: 350,
           height: 150,
           child: Card(
               clipBehavior: Clip.antiAlias,
