@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:all_life/page/Community/message_center.dart';
 import 'package:all_life/page/Community/review.dart';
 import 'package:all_life/page/Community/review_create.dart';
@@ -81,6 +83,13 @@ void Get_GPS(String Client_ID, String Client_Secret) async {
   if (await sp.getString("loginInfo") == null) {
     await sp.setString("loginInfo", '{"login":0,"token":"","refreshtoken":""}');
     print("처음이라서 로그인 관련객체 생성됨");
+  } else {
+    String userdata = sp.getString("loginInfo")!;
+    Map<String, dynamic> userinfo = jsonDecode(userdata);
+    if (userinfo['login'] == 0) {
+      await sp.setString("loginInfo",
+          '{"login":0, "token":"","refreshtoken":"","userimage": "assets/default_avatar.jpg","username": "Guest","email": "Guest@Guest.com","term": "false","type": 2}');
+    } else {}
   }
 }
 

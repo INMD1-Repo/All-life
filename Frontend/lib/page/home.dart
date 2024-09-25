@@ -17,6 +17,17 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   String? earthquake;
   String? tsunami;
   String? default_card;
+  Map<String, dynamic> userinfo = {
+    "login": 0,
+    "token": "",
+    "refreshtoken": "",
+    "userimage": "assets/default_avatar.jpg",
+    "username": "Guest",
+    "email": "Guest@Guest.com",
+    "term": "false",
+    "type": 2
+  };
+
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
@@ -44,6 +55,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   Future<void> _loadLocation() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
+    //새로 로드함
+    String userinfo_sp = sp.getString("loginInfo")!;
+    userinfo = jsonDecode(userinfo_sp);
+    print(userinfo_sp);
     String? data = await sp.getString("locationjson");
     String city =
         jsonDecode(data!)["results"][0]["region"]["area2"]["name"].toString();
@@ -399,16 +414,16 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                 children: [
                                   CircleAvatar(
                                     radius: 48, // Image radius
-                                    backgroundImage: NetworkImage(
-                                        'https://img2.sbs.co.kr/img/sbs_cms/VD/2014/10/13/VD19790540_w640_h360.jpg'),
+                                    backgroundImage:
+                                        AssetImage(userinfo["userimage"]),
                                   ),
-                                  Container(height: 4),
+                                  SizedBox(height: 10),
                                   Text(
-                                    "Test님",
+                                    userinfo["username"],
                                     style:
                                         TextStyle(fontWeight: FontWeight.bold),
                                   ),
-                                  Text("Test%Test.com")
+                                  Text(userinfo["email"])
                                 ],
                               )),
                           //=======================프로필 나타내는 구간 끝========================

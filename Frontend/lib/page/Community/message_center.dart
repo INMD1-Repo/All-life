@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class message_center extends StatefulWidget {
   const message_center({super.key});
@@ -12,6 +15,47 @@ class message_center extends StatefulWidget {
 class _message_centerState extends State<message_center>
     with WidgetsBindingObserver {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  Map<String, dynamic> userinfo = {
+    "login": 0,
+    "token": "",
+    "refreshtoken": "",
+    "userimage": "assets/default_avatar.jpg",
+    "username": "Guest",
+    "email": "Guest@Guest.com",
+    "term": "false",
+    "type": 2
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLocation();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  //메모리 누수 방지
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    // TODO: implement didChangeAppLifecycleState
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed) {
+      _loadLocation();
+    }
+  }
+
+  Future<void> _loadLocation() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    //새로 로드함
+    String userinfo_sp = sp.getString("loginInfo")!;
+    userinfo = jsonDecode(userinfo_sp);
+    print(userinfo_sp);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -163,16 +207,16 @@ class _message_centerState extends State<message_center>
                                 children: [
                                   CircleAvatar(
                                     radius: 48, // Image radius
-                                    backgroundImage: NetworkImage(
-                                        'https://img2.sbs.co.kr/img/sbs_cms/VD/2014/10/13/VD19790540_w640_h360.jpg'),
+                                    backgroundImage:
+                                        AssetImage(userinfo["userimage"]),
                                   ),
-                                  Container(height: 4),
+                                  SizedBox(height: 10),
                                   Text(
-                                    "Test님",
+                                    userinfo["username"],
                                     style:
                                         TextStyle(fontWeight: FontWeight.bold),
                                   ),
-                                  Text("Test%Test.com")
+                                  Text(userinfo["email"])
                                 ],
                               )),
                           //=======================프로필 나타내는 구간 끝========================
@@ -182,7 +226,8 @@ class _message_centerState extends State<message_center>
                           SizedBox(
                             width: 230, // 텍스트보다 큰 부모 위젯
                             child: Align(
-                              alignment: Alignment.centerLeft, // 텍스트를 왼쪽으로 정렬
+                              alignment: Alignment.centerLeft,
+                              // 텍스트를 왼쪽으로 정렬
                               child: Text('지도'),
                             ),
                           ),
@@ -212,7 +257,8 @@ class _message_centerState extends State<message_center>
                           SizedBox(
                             width: 230, // 텍스트보다 큰 부모 위젯
                             child: Align(
-                              alignment: Alignment.centerLeft, // 텍스트를 왼쪽으로 정렬
+                              alignment: Alignment.centerLeft,
+                              // 텍스트를 왼쪽으로 정렬
                               child: Text('커뮤니티'),
                             ),
                           ),
@@ -275,7 +321,8 @@ class _message_centerState extends State<message_center>
                           SizedBox(
                             width: 230, // 텍스트보다 큰 부모 위젯
                             child: Align(
-                              alignment: Alignment.centerLeft, // 텍스트를 왼쪽으로 정렬
+                              alignment: Alignment.centerLeft,
+                              // 텍스트를 왼쪽으로 정렬
                               child: Text('계정 및 설정'),
                             ),
                           ),
