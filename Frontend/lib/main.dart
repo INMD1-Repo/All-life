@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:all_life/page/Community/message_center.dart';
 import 'package:all_life/page/Community/review.dart';
 import 'package:all_life/page/Community/review_create.dart';
+import 'package:all_life/page/account.dart';
+import 'package:all_life/page/login.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:geolocator/geolocator.dart';
@@ -135,7 +137,10 @@ final GoRouter _router = GoRouter(
         builder: (context, state) => const message_center()),
     GoRoute(
         path: '/community/reivew', builder: (context, state) => const reivew()),
-
+    GoRoute(
+        path: '/login', builder: (context, state) => const loguin()),
+    GoRoute(
+        path: '/useraccount', builder: (context, state) => const account()),
     // 추가 경로를 여기에 정의
   ],
   errorBuilder: (context, state) => const ErrorPage(),

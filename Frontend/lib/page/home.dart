@@ -418,12 +418,22 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                         AssetImage(userinfo["userimage"]),
                                   ),
                                   SizedBox(height: 10),
-                                  Text(
-                                    userinfo["username"],
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                    Text(
+                                      userinfo["username"],
+                                      style:
+                                      TextStyle(fontWeight: FontWeight.bold),
+                                    ),
+                                    Text(userinfo["email"]),
+                                  ],
                                   ),
-                                  Text(userinfo["email"])
+                                      if (userinfo["login"] == 0) TextButton(onPressed: () => context.go(""), child: Text("로그인/회원가입", style: TextStyle(color: Colors.white),), style: ButtonStyle(backgroundColor:MaterialStateProperty.all(Colors.blue) )) else SizedBox()
+                                  ],)
                                 ],
                               )),
                           //=======================프로필 나타내는 구간 끝========================
