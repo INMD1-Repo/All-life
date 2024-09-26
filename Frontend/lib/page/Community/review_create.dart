@@ -118,7 +118,7 @@ class _review_createtate extends State<review_create>
                     flex: 8,
                     child: Container(
                       padding:
-                          EdgeInsets.fromLTRB(30, 20, 30, 0), // 오른쪽 padding 추가
+                          EdgeInsets.fromLTRB(30, 5, 30, 0), // 오른쪽 padding 추가
                       alignment: Alignment.centerLeft,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -410,7 +410,7 @@ class _review_createtate extends State<review_create>
                                           Text(userinfo["email"]),
                                         ],
                                       ),
-                                      if (userinfo["login"] == 0) TextButton(onPressed: () => context.go(""), child: Text("로그인/회원가입", style: TextStyle(color: Colors.white),), style: ButtonStyle(backgroundColor:MaterialStateProperty.all(Colors.blue) )) else SizedBox()
+                                      if (userinfo["login"] == 0) TextButton(onPressed: () => context.go("/login"), child: Text("로그인/회원가입", style: TextStyle(color: Colors.white),), style: ButtonStyle(backgroundColor:MaterialStateProperty.all(Colors.blue) )) else SizedBox()
                                     ],)
                                 ],
                               )),

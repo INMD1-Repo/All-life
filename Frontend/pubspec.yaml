@@ -88,6 +88,8 @@ flutter:
      - assets/cardinsert/default.jpg
      - assets/cardinsert/park.png
      - assets/default_avatar.jpg
+     - assets/app_logo.png
+     - assets/login_app_logo.png
 
 flutter_native_splash:
   android: true

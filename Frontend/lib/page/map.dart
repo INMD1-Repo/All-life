@@ -506,7 +506,7 @@ class _mapPageState extends State<mapPage> with WidgetsBindingObserver {
                                           Text(userinfo["email"]),
                                         ],
                                       ),
-                                      if (userinfo["login"] == 0) TextButton(onPressed: () => context.go(""), child: Text("로그인/회원가입", style: TextStyle(color: Colors.white),), style: ButtonStyle(backgroundColor:MaterialStateProperty.all(Colors.blue) )) else SizedBox()
+                                      if (userinfo["login"] == 0) TextButton(onPressed: () => context.go("/login"), child: Text("로그인/회원가입", style: TextStyle(color: Colors.white),), style: ButtonStyle(backgroundColor:MaterialStateProperty.all(Colors.blue) )) else SizedBox()
                                     ],)
                                 ],
                               )),

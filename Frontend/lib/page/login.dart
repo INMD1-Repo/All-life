@@ -49,7 +49,6 @@ class _loguinState extends State<loguin> with WidgetsBindingObserver {
 
   Future<void> _loadLocation() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
-    //새로 로드함
     String userinfo_sp = sp.getString("loginInfo")!;
     userinfo = jsonDecode(userinfo_sp);
     print(userinfo_sp);
@@ -66,77 +65,49 @@ class _loguinState extends State<loguin> with WidgetsBindingObserver {
           body: SafeArea(
             // SafeArea로 화면 영역 보호
             child: Container(
-              color: Color(0xfffafafa),
-              child: Column(
-                children: [
-                  Expanded(
-                    flex: 1, // 20%
-                    child: Container(),
-                  ),
-                  //  로그인
-                  Expanded(
-                    flex: 8,
-                    child: Container(),
-                  ),
-                  // 하단 메뉴 부분
-                  Container(
-                    height: 80,
-                    decoration: BoxDecoration(
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.5),
-                          spreadRadius: 5,
-                          blurRadius: 7,
-                          offset: Offset(0, 3),
-                        )
-                      ],
-                      color: Color(0xffF4F4F4),
+              color: Color(0xfffEEF7FF),
+              child: Center(
+                  child: Container(
+                padding: EdgeInsets.all(30),
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                  borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(10),
+                      bottomRight: Radius.circular(10),
+                      topLeft: Radius.circular(10),
+                      bottomLeft: Radius.circular(10)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: 80),
+                    Image.asset(
+                      "assets/login_app_logo.png",
+                      height: 100,
+                      width: 100,
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        _buildButton(0, Icons.home, "홈", false, '/'),
-                        _buildButton(1, Icons.place, "지도 보기", false, '/map'),
-                        _buildButton(2, Icons.diversity_3, "커뮤니티", true,
-                            '/community/reivew'),
-                        _buildButton(3, Icons.account_circle, "계정", false, '/'),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+                    Text("다시 만나서 반갑습니다.",
+                        style: TextStyle(
+                            fontSize: 30, fontWeight: FontWeight.bold)),
+                    Text("저희 ALL-LIFE(올라이프)는 대한민국의 재난 대피소를 AR로 보여주는 플랫폼 입니다."),
+                    SizedBox(height: 20),
+                    TextField(
+                        decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'Hint',
+                    )),
+                    SizedBox(height: 20),
+                    TextField(
+                        decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'Hint',
+                    ))
+                  ],
+                ),
+              )),
             ),
           ),
           //윈쪽 메뉴 공개합니다
         ));
-  }
-
-  // 버튼을 생성하는 메서드
-  Widget _buildButton(
-      int index, IconData icon, String label, bool change, String Page) {
-    return Padding(
-      padding: EdgeInsets.only(top: 10), // 여백 조정
-      child: TextButton(
-        onPressed: () => context.go(Page),
-        style: TextButton.styleFrom(
-          overlayColor: Colors.transparent, // 눌림 효과 제거
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min, // 아이콘과 텍스트의 크기 조정
-          children: [
-            Icon(
-              icon,
-              color: change == true ? Colors.blue : Colors.black,
-            ),
-            Text(
-              label,
-              style: TextStyle(
-                color: change == true ? Colors.blue : Colors.black,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }

@@ -75,9 +75,13 @@ class _accountState extends State<account> with WidgetsBindingObserver {
                   ),
                   //  로그인
                   Expanded(
-                    flex: 8,
-                    child: Container(),
-                  ),
+                      flex: 8,
+                      child: AndroidView(
+                        viewType: 'com.deu.hackton.all_life/native',
+                        onPlatformViewCreated: (int id) {
+                          print("AR view created with ID: $id");
+                        },
+                      )),
                   // 하단 메뉴 부분
                   Container(
                     height: 80,

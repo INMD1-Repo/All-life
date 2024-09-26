@@ -372,7 +372,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        _buildButton(0, Icons.home, "홈", true, '/'),
+                        _buildButton(0, Icons.home, "홈", true, '/useraccount'),
                         _buildButton(1, Icons.place, "지도 보기", false, '/map'),
                         _buildButton(2, Icons.diversity_3, "커뮤니티", false,
                             '/community/reivew'),
@@ -432,7 +432,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                     Text(userinfo["email"]),
                                   ],
                                   ),
-                                      if (userinfo["login"] == 0) TextButton(onPressed: () => context.go(""), child: Text("로그인/회원가입", style: TextStyle(color: Colors.white),), style: ButtonStyle(backgroundColor:MaterialStateProperty.all(Colors.blue) )) else SizedBox()
+                                      if (userinfo["login"] == 0) TextButton(onPressed: () => context.go("/login"), child: Text("로그인/회원가입", style: TextStyle(color: Colors.white),), style: ButtonStyle(backgroundColor:MaterialStateProperty.all(Colors.blue) )) else SizedBox()
                                   ],)
                                 ],
                               )),
