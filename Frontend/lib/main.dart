@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:all_life/page/Community/message_center.dart';
 import 'package:all_life/page/Community/review.dart';
 import 'package:all_life/page/Community/review_create.dart';
-import 'package:all_life/page/account.dart';
+import 'package:all_life/page/signup.dart';
 import 'package:all_life/page/login.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_naver_map/flutter_naver_map.dart';
@@ -140,7 +140,7 @@ final GoRouter _router = GoRouter(
     GoRoute(
         path: '/login', builder: (context, state) => const loguin()),
     GoRoute(
-        path: '/useraccount', builder: (context, state) => const account()),
+        path: '/signup', builder: (context, state) => const signup()),
     // 추가 경로를 여기에 정의
   ],
   errorBuilder: (context, state) => const ErrorPage(),
