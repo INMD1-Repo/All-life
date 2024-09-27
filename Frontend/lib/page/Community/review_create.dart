@@ -5,9 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
 class review_create extends StatefulWidget {
-  const review_create({super.key});
+  final Object? extra;
+
+  const review_create({super.key, this.extra});
 
   @override
   _review_createtate createState() => _review_createtate();
@@ -16,6 +19,7 @@ class review_create extends StatefulWidget {
 class _review_createtate extends State<review_create>
     with WidgetsBindingObserver {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  String uuid = "";
   double _rating = 0; // 초기 평점
   Map<String, dynamic> userinfo = {
     "login": 0,
@@ -28,10 +32,16 @@ class _review_createtate extends State<review_create>
     "type": 2
   };
 
+  bool _isCheckquestion1 = false;
+  bool _isCheckquestion2 = false;
+  bool _isCheckquestion3 = false;
+  bool _isCheckquestion4 = false;
+
   @override
   void initState() {
     super.initState();
     _loadLocation();
+    Post_data(widget.extra);
     WidgetsBinding.instance.addObserver(this);
   }
 
@@ -57,6 +67,100 @@ class _review_createtate extends State<review_create>
     String userinfo_sp = sp.getString("loginInfo")!;
     userinfo = jsonDecode(userinfo_sp);
   }
+
+  Future<void> logout() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    Map<String, dynamic> reset = {
+      "login": 0,
+      "token": "",
+      "refreshtoken": "",
+      "userimage": "assets/default_avatar.jpg",
+      "username": "Guest",
+      "email": "Guest@Guest.com",
+      "term": "false",
+      "type": 2
+    };
+    sp.setString("loginInfo", jsonEncode(reset));
+    context.go("/");
+  }
+
+  void Post_data(Object? extra) {
+    var Place_id = jsonDecode(extra!.toString());
+    uuid = Place_id["place_id"].toString();
+  }
+
+  void answer_send() async {
+    Map<String, dynamic> body = {
+      "question1": _isCheckquestion1 ? "1" : "0",
+      "question2": _isCheckquestion2 ? "1" : "0",
+      "question3": _isCheckquestion3 ? "1" : "0",
+      "question4": _isCheckquestion4 ? "1" : "0",
+      "rating": _rating,
+      "UserID": userinfo["username"],
+      "email": userinfo["email"],
+      "place_uuid": uuid
+    };
+
+    final url = Uri.parse('https://hackton.powerinmd.com/api/quest-answers');
+    final headers = {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer 00587b42c3284bf6137d9a0795d81e292f56d3cec953be9828cf25181ba9ef9e70ef3a2dd54526098592479f65e0436c009bd6739be705d40b9a69b5727c052aa462560bedca8c0341841427b1fd382c219cdf0ef9b61f01c2b18445f5a2151ae6e542b80c10cd3c0467daa404e4dfae159bbc40f2f2c8703d2654841fb149cf"
+    };
+
+    try {
+      // UserID를 조회하는 로직 추가
+      final userIdCheckUrl = Uri.parse('https://hackton.powerinmd.com/api/quest-answers?UserID=${userinfo["username"]}');
+      final userIdResponse = await http.get(userIdCheckUrl, headers: headers);
+
+      if (userIdResponse.statusCode == 200) {
+        final responseData = jsonDecode(userIdResponse.body);
+        final existingData = responseData['data'];
+
+        if (existingData.isNotEmpty) {
+          // UserID가 존재하는 경우 PUT 요청
+          final updateUrl = Uri.parse('https://hackton.powerinmd.com/api/quest-answers/${existingData[0]['id']}'); // ID를 사용하여 업데이트
+
+          final updateResponse = await http.put(
+            updateUrl,
+            headers: headers,
+            body: jsonEncode({"data": body}),
+          );
+
+          if (updateResponse.statusCode == 200) {
+            _showsnackbars(context);
+            context.go("/map");
+          } else {
+            print(updateResponse.body);
+            _showResultErrorDialog(true, "업데이트에 실패했습니다. 다시 시도해주시기 바랍니다.");
+          }
+        }
+      } else if (userIdResponse.statusCode == 404) {
+        // UserID가 존재하지 않는 경우 POST 요청
+        final response = await http.post(
+          url,
+          headers: headers,
+          body: jsonEncode({"data": body}),
+        );
+
+        if (response.statusCode == 200) {
+          _showsnackbars(context);
+          context.go("/map");
+        } else {
+          print(response.body);
+          _showResultErrorDialog(true, "업로드에 실패했습니다. 다시 시도해주시기 바랍니다.");
+        }
+      } else {
+        // 사용자 조회 실패 처리
+        print(userIdResponse.body);
+        _showResultErrorDialog(true, "사용자 조회에 실패했습니다. 다시 시도해주시기 바랍니다.");
+      }
+    } catch (e) {
+      // 에러 처리
+      print(e);
+      _showResultErrorDialog(true, "업로드에 실패했습니다. 다시 시도해주시기 바랍니다.");
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -150,8 +254,14 @@ class _review_createtate extends State<review_create>
                               children: [
                                 Transform.scale(
                                   scale: 1.4,
-                                  child:
-                                      Checkbox(value: false, onChanged: null),
+                                  child: Checkbox(
+                                    value: _isCheckquestion1,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _isCheckquestion1 = value!;
+                                      });
+                                    },
+                                  ),
                                 ),
                                 Expanded(
                                   child: Text(
@@ -181,8 +291,14 @@ class _review_createtate extends State<review_create>
                               children: [
                                 Transform.scale(
                                   scale: 1.4,
-                                  child:
-                                      Checkbox(value: false, onChanged: null),
+                                  child: Checkbox(
+                                    value: _isCheckquestion2,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _isCheckquestion2 = value!;
+                                      });
+                                    },
+                                  ),
                                 ),
                                 Expanded(
                                   child: Text(
@@ -212,8 +328,14 @@ class _review_createtate extends State<review_create>
                               children: [
                                 Transform.scale(
                                   scale: 1.4,
-                                  child:
-                                      Checkbox(value: false, onChanged: null),
+                                  child: Checkbox(
+                                    value: _isCheckquestion3,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _isCheckquestion3 = value!;
+                                      });
+                                    },
+                                  ),
                                 ),
                                 Expanded(
                                   child: Text(
@@ -243,8 +365,14 @@ class _review_createtate extends State<review_create>
                               children: [
                                 Transform.scale(
                                   scale: 1.4,
-                                  child:
-                                      Checkbox(value: false, onChanged: null),
+                                  child: Checkbox(
+                                    value: _isCheckquestion4,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _isCheckquestion4 = value!;
+                                      });
+                                    },
+                                  ),
                                 ),
                                 Expanded(
                                   child: Text(
@@ -315,7 +443,9 @@ class _review_createtate extends State<review_create>
                                 style: TextStyle(
                                     color: Colors.white, fontSize: 20),
                               ),
-                              onPressed: () {},
+                              onPressed: () {
+                                answer_send();
+                              },
                               style: ButtonStyle(
                                   backgroundColor:
                                       MaterialStateProperty.all(Colors.green),
@@ -353,8 +483,6 @@ class _review_createtate extends State<review_create>
                           _buildButton(1, Icons.place, "지도 보기", false, '/map'),
                           _buildButton(2, Icons.diversity_3, "커뮤니티", true,
                               '/community/reivew'),
-                          _buildButton(
-                              3, Icons.account_circle, "계정", false, '/'),
                         ],
                       ),
                     ),
@@ -393,25 +521,58 @@ class _review_createtate extends State<review_create>
                                   CircleAvatar(
                                     radius: 48, // Image radius
                                     backgroundImage:
-                                    AssetImage(userinfo["userimage"]),
+                                        AssetImage(userinfo["userimage"]),
                                   ),
                                   SizedBox(height: 10),
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             userinfo["username"],
-                                            style:
-                                            TextStyle(fontWeight: FontWeight.bold),
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold),
                                           ),
                                           Text(userinfo["email"]),
                                         ],
                                       ),
-                                      if (userinfo["login"] == 0) TextButton(onPressed: () => context.go("/login"), child: Text("로그인/회원가입", style: TextStyle(color: Colors.white),), style: ButtonStyle(backgroundColor:MaterialStateProperty.all(Colors.blue) )) else SizedBox()
-                                    ],)
+                                      if (userinfo["login"] == 0)
+                                        TextButton(
+                                            onPressed: () =>
+                                                context.go("/login"),
+                                            child: Text(
+                                              "로그인/회원가입",
+                                              style: TextStyle(
+                                                  color: Colors.white),
+                                            ),
+                                            style: ButtonStyle(
+                                                backgroundColor:
+                                                    MaterialStateProperty.all(
+                                                        Colors.blue)))
+                                      else
+                                        SizedBox(),
+                                      if (userinfo["login"] == 1)
+                                        TextButton(
+                                            onPressed: () {
+                                              logout();
+                                            },
+                                            child: Text(
+                                              "로그아웃",
+                                              style: TextStyle(
+                                                  color: Colors.white),
+                                            ),
+                                            style: ButtonStyle(
+                                                backgroundColor:
+                                                    MaterialStateProperty.all(
+                                                        Colors.blue)))
+                                      else
+                                        SizedBox()
+                                    ],
+                                  )
                                 ],
                               )),
                           //=======================프로필 나타내는 구간 끝========================
@@ -615,5 +776,48 @@ class _review_createtate extends State<review_create>
         );
       },
     );
+  }
+
+  Future<bool?> _showResultErrorDialog(type, String message) {
+    return showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        if (type) {
+          return AlertDialog(
+            title: const Text('오류!'),
+            content: Text(message),
+            actions: <Widget>[
+              TextButton(
+                style: TextButton.styleFrom(
+                  textStyle: Theme.of(context).textTheme.labelLarge,
+                ),
+                child: const Text('확인'),
+                onPressed: () {
+                  Navigator.pop(context, true); // 다이얼로그 닫기
+                },
+              ),
+            ],
+          );
+        } else {
+          return Container();
+        }
+      },
+    );
+  }
+
+  Future<void> _showsnackbars(BuildContext context) async {
+    final snackBar = SnackBar(
+      content: Text('정상적으로 제출했습니다.'),
+      duration: Duration(seconds: 5),
+      action: SnackBarAction(
+        label: '확인',
+        onPressed: () {
+          // 버튼 눌렀을 때의 작업을 여기에 추가하세요.
+        },
+      ),
+    );
+
+    // SnackBar를 화면에 표시합니다.
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 }

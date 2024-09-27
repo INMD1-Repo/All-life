@@ -52,6 +52,7 @@ class StarRating extends StatelessWidget {
 
 class _reivewState extends State<reivew> with WidgetsBindingObserver {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  late final Object? extra;
   Map<String, dynamic> userinfo = {
     "login": 0,
     "token": "",
@@ -62,6 +63,22 @@ class _reivewState extends State<reivew> with WidgetsBindingObserver {
     "term": "false",
     "type": 2
   };
+
+  Future<void> logout() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    Map<String, dynamic> reset = {
+      "login": 0,
+      "token": "",
+      "refreshtoken": "",
+      "userimage": "assets/default_avatar.jpg",
+      "username": "Guest",
+      "email": "Guest@Guest.com",
+      "term": "false",
+      "type": 2
+    };
+    sp.setString("loginInfo", jsonEncode(reset));
+    context.go("/");
+  }
 
   @override
   void initState() {
@@ -223,8 +240,7 @@ class _reivewState extends State<reivew> with WidgetsBindingObserver {
                         _buildButton(0, Icons.home, "홈", false, '/'),
                         _buildButton(1, Icons.place, "지도 보기", false, '/map'),
                         _buildButton(2, Icons.diversity_3, "커뮤니티", true,
-                            '/community/reivew'),
-                        _buildButton(3, Icons.account_circle, "계정", false, '/'),
+                            '/community/reivew')
                       ],
                     ),
                   ),
@@ -262,25 +278,58 @@ class _reivewState extends State<reivew> with WidgetsBindingObserver {
                                   CircleAvatar(
                                     radius: 48, // Image radius
                                     backgroundImage:
-                                    AssetImage(userinfo["userimage"]),
+                                        AssetImage(userinfo["userimage"]),
                                   ),
                                   SizedBox(height: 10),
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             userinfo["username"],
-                                            style:
-                                            TextStyle(fontWeight: FontWeight.bold),
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold),
                                           ),
                                           Text(userinfo["email"]),
                                         ],
                                       ),
-                                      if (userinfo["login"] == 0) TextButton(onPressed: () => context.go("/login"), child: Text("로그인/회원가입", style: TextStyle(color: Colors.white),), style: ButtonStyle(backgroundColor:MaterialStateProperty.all(Colors.blue) )) else SizedBox()
-                                    ],)
+                                      if (userinfo["login"] == 0)
+                                        TextButton(
+                                            onPressed: () =>
+                                                context.go("/login"),
+                                            child: Text(
+                                              "로그인/회원가입",
+                                              style: TextStyle(
+                                                  color: Colors.white),
+                                            ),
+                                            style: ButtonStyle(
+                                                backgroundColor:
+                                                    MaterialStateProperty.all(
+                                                        Colors.blue)))
+                                      else
+                                        SizedBox(),
+                                      if (userinfo["login"] == 1)
+                                        TextButton(
+                                            onPressed: () {
+                                              logout();
+                                            },
+                                            child: Text(
+                                              "로그아웃",
+                                              style: TextStyle(
+                                                  color: Colors.white),
+                                            ),
+                                            style: ButtonStyle(
+                                                backgroundColor:
+                                                    MaterialStateProperty.all(
+                                                        Colors.blue)))
+                                      else
+                                        SizedBox()
+                                    ],
+                                  )
                                 ],
                               )),
                           //=======================프로필 나타내는 구간 끝========================

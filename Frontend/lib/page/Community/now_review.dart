@@ -12,9 +12,9 @@ class now_review extends StatefulWidget {
   _now_reviewState createState() => _now_reviewState();
 }
 
-class _now_reviewState extends State<now_review>
-    with WidgetsBindingObserver {
+class _now_reviewState extends State<now_review>  with WidgetsBindingObserver {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  String plcae_json = "";
   Map<String, dynamic> userinfo = {
     "login": 0,
     "token": "",
@@ -39,7 +39,21 @@ class _now_reviewState extends State<now_review>
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
-
+  Future<void> logout() async{
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    Map<String, dynamic> reset = {
+      "login": 0,
+      "token": "",
+      "refreshtoken": "",
+      "userimage": "assets/default_avatar.jpg",
+      "username": "Guest",
+      "email": "Guest@Guest.com",
+      "term": "false",
+      "type": 2
+    };
+    sp.setString("loginInfo", jsonEncode(reset));
+    context.go("/");
+  }
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     // TODO: implement didChangeAppLifecycleState
@@ -135,7 +149,6 @@ class _now_reviewState extends State<now_review>
                         _buildButton(1, Icons.place, "지도 보기", false, '/map'),
                         _buildButton(2, Icons.diversity_3, "커뮤니티", true,
                             '/community/reivew'),
-                        _buildButton(3, Icons.account_circle, "계정", false, '/'),
                       ],
                     ),
                   ),
@@ -190,7 +203,8 @@ class _now_reviewState extends State<now_review>
                                               Text(userinfo["email"]),
                                             ],
                                           ),
-                                          if (userinfo["login"] == 0) TextButton(onPressed: () => context.go("/login"), child: Text("로그인/회원가입", style: TextStyle(color: Colors.white),), style: ButtonStyle(backgroundColor:MaterialStateProperty.all(Colors.blue) )) else SizedBox()
+                                          if (userinfo["login"] == 0) TextButton(onPressed: () => context.go("/login"), child: Text("로그인/회원가입", style: TextStyle(color: Colors.white),), style: ButtonStyle(backgroundColor:MaterialStateProperty.all(Colors.blue) )) else SizedBox(),
+                                          if (userinfo["login"] == 1) TextButton(onPressed: () {logout();}, child: Text("로그아웃", style: TextStyle(color: Colors.white),), style: ButtonStyle(backgroundColor:MaterialStateProperty.all(Colors.blue) )) else SizedBox()
                                         ],)
                                     ],
                                   )),
@@ -363,4 +377,8 @@ class _now_reviewState extends State<now_review>
     );
   }
 
+}
+
+extension on GoRouter {
+  get params => null;
 }

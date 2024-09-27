@@ -54,7 +54,8 @@ class StarRating extends StatelessWidget {
 class _mapPageState extends State<mapPage> with WidgetsBindingObserver {
   String? earthquake;
   String? tsunami;
-  String? info = "https://hackton-ar.powerinmd.com/?city=%EB%B6%80%EC%82%B0%EC%A7%84%EA%B5%AC&dong=%EA%B0%80%EC%95%BC%EB%8F%99";
+  String? info =
+      "https://hackton-ar.powerinmd.com/?city=%EB%B6%80%EC%82%B0%EC%A7%84%EA%B5%AC&dong=%EA%B0%80%EC%95%BC%EB%8F%99";
   Map<String, dynamic> userinfo = {
     "login": 0,
     "token": "",
@@ -70,7 +71,6 @@ class _mapPageState extends State<mapPage> with WidgetsBindingObserver {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   bool _showContainer = false; // 조건을 저장하는 변수
-
 
   //유동성을 위한 함수
   void _toggleContainer(allw) {
@@ -111,11 +111,29 @@ class _mapPageState extends State<mapPage> with WidgetsBindingObserver {
     userinfo = jsonDecode(userinfo_sp);
     print(userinfo_sp);
     String? data = await sp.getString("locationjson");
-    String city = jsonDecode(data!)["results"][0]["region"]["area2"]["name"].toString();
-    String dong = jsonDecode(data!)["results"][0]["region"]["area3"]["name"].toString();
+    String city =
+        jsonDecode(data!)["results"][0]["region"]["area2"]["name"].toString();
+    String dong =
+        jsonDecode(data!)["results"][0]["region"]["area3"]["name"].toString();
     setState(() {
       info = "https://hackton-ar.powerinmd.com/?city=$city&dong=$dong";
     });
+  }
+
+  Future<void> logout() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    Map<String, dynamic> reset = {
+      "login": 0,
+      "token": "",
+      "refreshtoken": "",
+      "userimage": "assets/default_avatar.jpg",
+      "username": "Guest",
+      "email": "Guest@Guest.com",
+      "term": "false",
+      "type": 2
+    };
+    sp.setString("loginInfo", jsonEncode(reset));
+    context.go("/");
   }
 
   //GPS관련 세팅
@@ -450,7 +468,6 @@ class _mapPageState extends State<mapPage> with WidgetsBindingObserver {
                         _buildButton(1, Icons.place, "지도 보기", true, '/map'),
                         _buildButton(2, Icons.diversity_3, "커뮤니티", false,
                             '/community/reivew'),
-                        _buildButton(3, Icons.account_circle, "계정", false, '/'),
                       ],
                     ),
                   ),
@@ -487,25 +504,58 @@ class _mapPageState extends State<mapPage> with WidgetsBindingObserver {
                                   CircleAvatar(
                                     radius: 48, // Image radius
                                     backgroundImage:
-                                    AssetImage(userinfo["userimage"]),
+                                        AssetImage(userinfo["userimage"]),
                                   ),
                                   SizedBox(height: 10),
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
                                             userinfo["username"],
-                                            style:
-                                            TextStyle(fontWeight: FontWeight.bold),
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold),
                                           ),
                                           Text(userinfo["email"]),
                                         ],
                                       ),
-                                      if (userinfo["login"] == 0) TextButton(onPressed: () => context.go("/login"), child: Text("로그인/회원가입", style: TextStyle(color: Colors.white),), style: ButtonStyle(backgroundColor:MaterialStateProperty.all(Colors.blue) )) else SizedBox()
-                                    ],)
+                                      if (userinfo["login"] == 0)
+                                        TextButton(
+                                            onPressed: () =>
+                                                context.go("/login"),
+                                            child: Text(
+                                              "로그인/회원가입",
+                                              style: TextStyle(
+                                                  color: Colors.white),
+                                            ),
+                                            style: ButtonStyle(
+                                                backgroundColor:
+                                                    MaterialStateProperty.all(
+                                                        Colors.blue)))
+                                      else
+                                        SizedBox(),
+                                      if (userinfo["login"] == 1)
+                                        TextButton(
+                                            onPressed: () {
+                                              logout();
+                                            },
+                                            child: Text(
+                                              "로그아웃",
+                                              style: TextStyle(
+                                                  color: Colors.white),
+                                            ),
+                                            style: ButtonStyle(
+                                                backgroundColor:
+                                                    MaterialStateProperty.all(
+                                                        Colors.blue)))
+                                      else
+                                        SizedBox()
+                                    ],
+                                  )
                                 ],
                               )),
                           //=======================프로필 나타내는 구간 끝========================
@@ -763,13 +813,18 @@ class _mapPageState extends State<mapPage> with WidgetsBindingObserver {
                                         TextButton(
                                             onPressed: () {
                                               context.go(
-                                                  "/community/review_create");
+                                                  "/login");
                                             },
                                             child: Text("로그인"))
                                       ],
                                     );
                                   },
                                 );
+                              } else {
+                                print("/community/review_create?place_id=" +
+                                    jsonEncode(userMap["attributes"]));
+                                context.go("/community/review_create",
+                                    extra: jsonEncode({"place_id": userMap["attributes"]['place_id']}));
                               }
                             },
                             child: const Text(

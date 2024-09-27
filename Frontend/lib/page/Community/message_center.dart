@@ -48,7 +48,21 @@ class _message_centerState extends State<message_center>
       _loadLocation();
     }
   }
-
+  Future<void> logout() async{
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    Map<String, dynamic> reset = {
+      "login": 0,
+      "token": "",
+      "refreshtoken": "",
+      "userimage": "assets/default_avatar.jpg",
+      "username": "Guest",
+      "email": "Guest@Guest.com",
+      "term": "false",
+      "type": 2
+    };
+    sp.setString("loginInfo", jsonEncode(reset));
+    context.go("/");
+  }
   Future<void> _loadLocation() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     //새로 로드함
@@ -170,7 +184,6 @@ class _message_centerState extends State<message_center>
                         _buildButton(1, Icons.place, "지도 보기", false, '/map'),
                         _buildButton(2, Icons.diversity_3, "커뮤니티", true,
                             '/community/reivew'),
-                        _buildButton(3, Icons.account_circle, "계정", false, '/'),
                       ],
                     ),
                   ),
@@ -181,191 +194,192 @@ class _message_centerState extends State<message_center>
           //윈쪽 메뉴 공개합니다
           drawer: Drawer(
               child: Container(
-            color: Colors.white,
-            child: Column(
-              children: [
-                //빈공간
-                Expanded(
-                  flex: 1,
-                  child: Container(
-                    height: 100,
-                  ),
-                ),
-                //메뉴 로그인 요소들
-                Expanded(
-                    flex: 8,
-                    child: Container(
-                      alignment: Alignment.centerLeft,
-                      margin: EdgeInsets.fromLTRB(20, 0, 20, 0),
-                      child: Column(
-                        children: [
-                          //=======================프로필 나타내는 구간========================
-                          Container(
-                              alignment: Alignment.centerLeft,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  CircleAvatar(
-                                    radius: 48, // Image radius
-                                    backgroundImage:
-                                    AssetImage(userinfo["userimage"]),
-                                  ),
-                                  SizedBox(height: 10),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            userinfo["username"],
-                                            style:
-                                            TextStyle(fontWeight: FontWeight.bold),
-                                          ),
-                                          Text(userinfo["email"]),
-                                        ],
-                                      ),
-                                      if (userinfo["login"] == 0) TextButton(onPressed: () => context.go("/login"), child: Text("로그인/회원가입", style: TextStyle(color: Colors.white),), style: ButtonStyle(backgroundColor:MaterialStateProperty.all(Colors.blue) )) else SizedBox()
-                                    ],)
-                                ],
-                              )),
-                          //=======================프로필 나타내는 구간 끝========================
-                          //=======================버튼 나타내튼 구간========================
-                          //=======================지도========================
-                          Container(height: 20),
-                          SizedBox(
-                            width: 230, // 텍스트보다 큰 부모 위젯
-                            child: Align(
-                              alignment: Alignment.centerLeft,
-                              // 텍스트를 왼쪽으로 정렬
-                              child: Text('지도'),
-                            ),
-                          ),
-                          SizedBox(
-                            width: double.infinity * 0.3,
-                            child: TextButton.icon(
-                              onPressed: () => context.go("/map"),
-                              icon: const Icon(Icons.map),
-                              label: const Text(
-                                '지도보기',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              style: TextButton.styleFrom(
-                                alignment: Alignment.centerLeft, // 왼쪽 정렬
-                              ),
-                            ),
-                          ),
-                          Divider(
-                            color: Colors.grey, // 선 색상
-                            thickness: 1, // 선 두께
-                            indent: 10, // 왼쪽 여백
-                            endIndent: 10, // 오른쪽 여백
-                          ),
-                          //=======================지도 끝========================
-                          //=======================커뮤니티========================
-                          Container(height: 7),
-                          SizedBox(
-                            width: 230, // 텍스트보다 큰 부모 위젯
-                            child: Align(
-                              alignment: Alignment.centerLeft,
-                              // 텍스트를 왼쪽으로 정렬
-                              child: Text('커뮤니티'),
-                            ),
-                          ),
-                          SizedBox(
-                            width: double.infinity * 0.3,
-                            child: TextButton.icon(
-                              onPressed: () =>
-                                  context.go("/community/message_center"),
-                              icon: const Icon(Icons.warning),
-                              label: const Text(
-                                '재난문자 보기',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              style: TextButton.styleFrom(
-                                alignment: Alignment.centerLeft, // 왼쪽 정렬
-                              ),
-                            ),
-                          ),
-                          Container(height: 5),
-                          SizedBox(
-                            width: double.infinity * 0.3,
-                            child: TextButton.icon(
-                              onPressed: () => context.go("/community/reivew"),
-                              icon: const Icon(Icons.book),
-                              label: const Text(
-                                '대피소 리뷰보기',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              style: TextButton.styleFrom(
-                                alignment: Alignment.centerLeft, // 왼쪽 정렬
-                              ),
-                            ),
-                          ),
-                          Container(height: 5),
-                          SizedBox(
-                            width: double.infinity * 0.3,
-                            child: TextButton.icon(
-                              onPressed: () =>
-                                  context.go("/community/review_create"),
-                              icon: const Icon(Icons.edit),
-                              label: const Text(
-                                '리뷰 수정및 작성하기',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              style: TextButton.styleFrom(
-                                alignment: Alignment.centerLeft, // 왼쪽 정렬
-                              ),
-                            ),
-                          ),
-                          Container(height: 5),
-                          Divider(
-                            color: Colors.grey, // 선 색상
-                            thickness: 1, // 선 두께
-                            indent: 10, // 왼쪽 여백
-                            endIndent: 10, // 오른쪽 여백
-                          ),
-                          //=======================커뮤니티 끝========================
-                          //=======================계정 및 설정 ========================
-                          Container(height: 5),
-                          SizedBox(
-                            width: 230, // 텍스트보다 큰 부모 위젯
-                            child: Align(
-                              alignment: Alignment.centerLeft,
-                              // 텍스트를 왼쪽으로 정렬
-                              child: Text('계정 및 설정'),
-                            ),
-                          ),
-                          Container(height: 5),
-                          SizedBox(
-                            width: double.infinity * 0.3,
-                            child: TextButton.icon(
-                              onPressed: () {},
-                              icon: const Icon(Icons.map),
-                              label: const Text(
-                                '마이프로필',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              style: TextButton.styleFrom(
-                                alignment: Alignment.centerLeft, // 왼쪽 정렬
-                              ),
-                            ),
-                          )
-                          //=======================계정 및 설정 끝========================
-                          //=======================버튼 나타내튼 구간 끝========================
-                        ],
+                color: Colors.white,
+                child: Column(
+                  children: [
+                    //빈공간
+                    Expanded(
+                      flex: 1,
+                      child: Container(
+                        height: 100,
                       ),
-                    )),
-                //빈공간
-                Expanded(
-                  flex: 1,
-                  child: Container(
-                    height: 100,
-                  ),
-                )
-              ],
-            ),
-          )),
+                    ),
+                    //메뉴 로그인 요소들
+                    Expanded(
+                        flex: 8,
+                        child: Container(
+                          alignment: Alignment.centerLeft,
+                          margin: EdgeInsets.fromLTRB(20, 0, 20, 0),
+                          child: Column(
+                            children: [
+                              //=======================프로필 나타내는 구간========================
+                              Container(
+                                  alignment: Alignment.centerLeft,
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      CircleAvatar(
+                                        radius: 48, // Image radius
+                                        backgroundImage:
+                                        AssetImage(userinfo["userimage"]),
+                                      ),
+                                      SizedBox(height: 10),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                userinfo["username"],
+                                                style:
+                                                TextStyle(fontWeight: FontWeight.bold),
+                                              ),
+                                              Text(userinfo["email"]),
+                                            ],
+                                          ),
+                                          if (userinfo["login"] == 0) TextButton(onPressed: () => context.go("/login"), child: Text("로그인/회원가입", style: TextStyle(color: Colors.white),), style: ButtonStyle(backgroundColor:MaterialStateProperty.all(Colors.blue) )) else SizedBox(),
+                                          if (userinfo["login"] == 1) TextButton(onPressed: () {logout();}, child: Text("로그아웃", style: TextStyle(color: Colors.white),), style: ButtonStyle(backgroundColor:MaterialStateProperty.all(Colors.blue) )) else SizedBox()
+                                        ],)
+                                    ],
+                                  )),
+                              //=======================프로필 나타내는 구간 끝========================
+                              //=======================버튼 나타내튼 구간========================
+                              //=======================지도========================
+                              Container(height: 20),
+                              SizedBox(
+                                width: 230, // 텍스트보다 큰 부모 위젯
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  // 텍스트를 왼쪽으로 정렬
+                                  child: Text('지도'),
+                                ),
+                              ),
+                              SizedBox(
+                                width: double.infinity * 0.3,
+                                child: TextButton.icon(
+                                  onPressed: () => context.go("/map"),
+                                  icon: const Icon(Icons.map),
+                                  label: const Text(
+                                    '지도보기',
+                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  style: TextButton.styleFrom(
+                                    alignment: Alignment.centerLeft, // 왼쪽 정렬
+                                  ),
+                                ),
+                              ),
+                              Divider(
+                                color: Colors.grey, // 선 색상
+                                thickness: 1, // 선 두께
+                                indent: 10, // 왼쪽 여백
+                                endIndent: 10, // 오른쪽 여백
+                              ),
+                              //=======================지도 끝========================
+                              //=======================커뮤니티========================
+                              Container(height: 7),
+                              SizedBox(
+                                width: 230, // 텍스트보다 큰 부모 위젯
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  // 텍스트를 왼쪽으로 정렬
+                                  child: Text('커뮤니티'),
+                                ),
+                              ),
+                              SizedBox(
+                                width: double.infinity * 0.3,
+                                child: TextButton.icon(
+                                  onPressed: () =>
+                                      context.go("/community/message_center"),
+                                  icon: const Icon(Icons.warning),
+                                  label: const Text(
+                                    '재난문자 보기',
+                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  style: TextButton.styleFrom(
+                                    alignment: Alignment.centerLeft, // 왼쪽 정렬
+                                  ),
+                                ),
+                              ),
+                              Container(height: 5),
+                              SizedBox(
+                                width: double.infinity * 0.3,
+                                child: TextButton.icon(
+                                  onPressed: () => context.go("/community/reivew"),
+                                  icon: const Icon(Icons.book),
+                                  label: const Text(
+                                    '대피소 리뷰보기',
+                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  style: TextButton.styleFrom(
+                                    alignment: Alignment.centerLeft, // 왼쪽 정렬
+                                  ),
+                                ),
+                              ),
+                              Container(height: 5),
+                              SizedBox(
+                                width: double.infinity * 0.3,
+                                child: TextButton.icon(
+                                  onPressed: () =>
+                                      context.go("/community/review_create"),
+                                  icon: const Icon(Icons.edit),
+                                  label: const Text(
+                                    '리뷰 수정및 작성하기',
+                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  style: TextButton.styleFrom(
+                                    alignment: Alignment.centerLeft, // 왼쪽 정렬
+                                  ),
+                                ),
+                              ),
+                              Container(height: 5),
+                              Divider(
+                                color: Colors.grey, // 선 색상
+                                thickness: 1, // 선 두께
+                                indent: 10, // 왼쪽 여백
+                                endIndent: 10, // 오른쪽 여백
+                              ),
+                              //=======================커뮤니티 끝========================
+                              //=======================계정 및 설정 ========================
+                              Container(height: 5),
+                              SizedBox(
+                                width: 230, // 텍스트보다 큰 부모 위젯
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  // 텍스트를 왼쪽으로 정렬
+                                  child: Text('계정 및 설정'),
+                                ),
+                              ),
+                              Container(height: 5),
+                              SizedBox(
+                                width: double.infinity * 0.3,
+                                child: TextButton.icon(
+                                  onPressed: () {},
+                                  icon: const Icon(Icons.map),
+                                  label: const Text(
+                                    '마이프로필',
+                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  style: TextButton.styleFrom(
+                                    alignment: Alignment.centerLeft, // 왼쪽 정렬
+                                  ),
+                                ),
+                              )
+                              //=======================계정 및 설정 끝========================
+                              //=======================버튼 나타내튼 구간 끝========================
+                            ],
+                          ),
+                        )),
+                    //빈공간
+                    Expanded(
+                      flex: 1,
+                      child: Container(
+                        height: 100,
+                      ),
+                    )
+                  ],
+                ),
+              )),
         ));
   }
 

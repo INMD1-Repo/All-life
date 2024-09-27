@@ -131,7 +131,11 @@ final GoRouter _router = GoRouter(
     ),
     GoRoute(
         path: '/community/review_create',
-        builder: (context, state) => const review_create()),
+        builder: (context, state) {
+          return review_create(
+            extra: state.extra
+          );
+        }),
     GoRoute(
         path: '/community/message_center',
         builder: (context, state) => const message_center()),
