@@ -140,7 +140,7 @@ final GoRouter _router = GoRouter(
     GoRoute(
         path: '/login', builder: (context, state) => const loguin()),
     GoRoute(
-        path: '/signup', builder: (context, state) => const signup()),
+        path: '/signup', builder: (context, state) => const Signup()),
     // 추가 경로를 여기에 정의
   ],
   errorBuilder: (context, state) => const ErrorPage(),
