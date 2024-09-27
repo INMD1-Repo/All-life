@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
 class reivew extends StatefulWidget {
   const reivew({super.key});
@@ -52,7 +53,8 @@ class StarRating extends StatelessWidget {
 
 class _reivewState extends State<reivew> with WidgetsBindingObserver {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  late final Object? extra;
+  String getreivew = "{\"data\":[{\"id\":4,\"attributes\":{\"question1\":\"0\",\"question2\":\"1\",\"question3\":\"1\",\"question4\":\"1\",\"rating\":3.5,\"UserID\":\"데이터불러오는중\",\"email\":\"lyw514549@gmail.com\",\"createdAt\":\"2024-09-27T15:08:03.562Z\",\"updatedAt\":\"2024-09-27T20:50:30.235Z\",\"publishedAt\":\"2024-09-27T15:08:03.559Z\",\"place_uuid\":\"1165e08e-5f25-4fb6-891c-0082823183d6\",\"place\":\"데이터불러오는중\"}}],\"meta\":{\"pagination\":{\"page\":1,\"pageSize\":25,\"pageCount\":1,\"total\":1}}}";
+
   Map<String, dynamic> userinfo = {
     "login": 0,
     "token": "",
@@ -82,8 +84,8 @@ class _reivewState extends State<reivew> with WidgetsBindingObserver {
 
   @override
   void initState() {
-    super.initState();
     _loadLocation();
+    super.initState();
     WidgetsBinding.instance.addObserver(this);
   }
 
@@ -108,7 +110,17 @@ class _reivewState extends State<reivew> with WidgetsBindingObserver {
     //새로 로드함
     String userinfo_sp = sp.getString("loginInfo")!;
     userinfo = jsonDecode(userinfo_sp);
-    print(userinfo_sp);
+    final Url = Uri.parse('https://hackton.powerinmd.com/api/quest-answers');
+    final headers = {
+      "Content-Type": "application/json",
+      "Authorization":
+          "Bearer 00587b42c3284bf6137d9a0795d81e292f56d3cec953be9828cf25181ba9ef9e70ef3a2dd54526098592479f65e0436c009bd6739be705d40b9a69b5727c052aa462560bedca8c0341841427b1fd382c219cdf0ef9b61f01c2b18445f5a2151ae6e542b80c10cd3c0467daa404e4dfae159bbc40f2f2c8703d2654841fb149cf"
+    };
+    final userIdResponse = await http.get(Url, headers: headers);
+    setState(() {
+      getreivew = userIdResponse.body;
+    });
+    print(getreivew);
   }
 
   @override
@@ -504,185 +516,190 @@ class _reivewState extends State<reivew> with WidgetsBindingObserver {
   //리뷰를 불려내기 위한 것
   //추후 로그인 연동시 리스트 불려올수 있도록 조치 할것
   _ADD_list() {
+    Map<String, dynamic> userMap = jsonDecode(getreivew);
     List<Widget> children = [];
     try {
-      children.add(Column(
-        children: [
-          SizedBox(
-            height: 10,
-          ),
-          Container(
-            decoration: const BoxDecoration(
-              color: Colors.white, // Move color into BoxDecoration
-              borderRadius: BorderRadius.only(
-                  topRight: Radius.circular(20),
-                  bottomRight: Radius.circular(20),
-                  topLeft: Radius.circular(20),
-                  bottomLeft: Radius.circular(20)),
+      for (int i = 0; i < userMap["data"].length; i++) {
+        children.add(Column(
+          children: [
+            SizedBox(
+              height: 10,
             ),
-            width: double.infinity,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
-              child: Column(
-                children: [
-                  Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(50.0),
-                            //make border radius more than 50% of square height & width
-                            child: Image.network(
-                              "https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885__480.jpg",
-                              height: 60.0,
-                              width: 60.0,
-                              fit: BoxFit.cover, //change image fill type
-                            ),
-                          ),
-                          SizedBox(width: 10),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "사용자 이름",
-                                style: TextStyle(
-                                    fontSize: 20, fontWeight: FontWeight.bold),
-                              ),
-                              Text(
-                                "장소:",
-                                style: TextStyle(
-                                    fontSize: 12, fontWeight: FontWeight.bold),
-                              ),
-                              StarRating(rating: 2.0),
-                            ],
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 10),
-                      ExpansionTile(
-                        title: Text(
-                          "질문 상세 보기",
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        children: [
-                          Padding(
-                              padding: EdgeInsets.fromLTRB(20, 0, 0, 0),
-                              child: Column(
-                                children: [
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text("[1번째 질문]"),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          SizedBox(
-                                            width: 240,
-                                            child: Text(
-                                              "수용가능 인원댜비 생필품 재고는 충분히 구비되어 있는가?",
-                                              style: TextStyle(fontSize: 12),
-                                              maxLines: 2,
-                                            ),
-                                          ),
-                                          Text("✅",
-                                              style: TextStyle(fontSize: 20)),
-                                          SizedBox(width: 10)
-                                        ],
-                                      ),
-                                      SizedBox(height: 10)
-                                    ],
-                                  ),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text("[2번째 질문]"),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          SizedBox(
-                                            width: 240,
-                                            child: Text(
-                                              "대피소는 상시 개발을 준수하고 있는가?",
-                                              style: TextStyle(fontSize: 12),
-                                              maxLines: 2,
-                                            ),
-                                          ),
-                                          Text("✅",
-                                              style: TextStyle(fontSize: 20)),
-                                          SizedBox(width: 10)
-                                        ],
-                                      ),
-                                      SizedBox(height: 10)
-                                    ],
-                                  ),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text("[3번째 질문]"),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          SizedBox(
-                                            width: 240,
-                                            child: Text(
-                                              "용도에 맟게 사용되고 있는가?",
-                                              style: TextStyle(fontSize: 12),
-                                              maxLines: 2,
-                                            ),
-                                          ),
-                                          Text("✅",
-                                              style: TextStyle(fontSize: 20)),
-                                          SizedBox(width: 10)
-                                        ],
-                                      ),
-                                      SizedBox(height: 10)
-                                    ],
-                                  ),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text("[4번째 질문]"),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          SizedBox(
-                                            width: 240,
-                                            child: Text(
-                                              "건물 관리자는 대피소의 정확한 위치를 알고 있는가?",
-                                              style: TextStyle(fontSize: 12),
-                                              maxLines: 2,
-                                            ),
-                                          ),
-                                          Text("✅",
-                                              style: TextStyle(fontSize: 20)),
-                                          SizedBox(width: 10)
-                                        ],
-                                      ),
-                                      SizedBox(height: 10)
-                                    ],
-                                  ),
-                                ],
-                              ))
-                        ],
-                      ),
-                      SizedBox(height: 10)
-                    ],
-                  )
-                ],
+            Container(
+              decoration: const BoxDecoration(
+                color: Colors.white, // Move color into BoxDecoration
+                borderRadius: BorderRadius.only(
+                    topRight: Radius.circular(20),
+                    bottomRight: Radius.circular(20),
+                    topLeft: Radius.circular(20),
+                    bottomLeft: Radius.circular(20)),
               ),
-            ),
-          )
-        ],
-      ));
+              width: double.infinity,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+                child: Column(
+                  children: [
+                    Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(50.0),
+                              //make border radius more than 50% of square height & width
+                              child: Image.asset(
+                                "assets/default_avatar.jpg",
+                                height: 60.0,
+                                width: 60.0,
+                                fit: BoxFit.cover, //change image fill type
+                              ),
+                            ),
+                            SizedBox(width: 10),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  userMap["data"][i]["attributes"]["UserID"] ,
+                                  style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                Text(
+                                  "장소:" + userMap["data"][i]["attributes"]["place"],
+                                  style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                StarRating(rating: userMap["data"][i]["attributes"]["rating"].toDouble()),
+                              ],
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 10),
+                        ExpansionTile(
+                          title: Text(
+                            "질문 상세 보기",
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          children: [
+                            Padding(
+                                padding: EdgeInsets.fromLTRB(20, 0, 0, 0),
+                                child: Column(
+                                  children: [
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text("[1번째 질문]"),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            SizedBox(
+                                              width: 240,
+                                              child: Text(
+                                                "수용가능 인원댜비 생필품 재고는 충분히 구비되어 있는가?",
+                                                style: TextStyle(fontSize: 12),
+                                                maxLines: 2,
+                                              ),
+                                            ),
+                                            Text(userMap["data"][i]["attributes"]["question1"] == "1" ? "✅" : "❌",
+                                                style: TextStyle(fontSize: 20)),
+                                            SizedBox(width: 10)
+                                          ],
+                                        ),
+                                        SizedBox(height: 10)
+                                      ],
+                                    ),
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text("[2번째 질문]"),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            SizedBox(
+                                              width: 240,
+                                              child: Text(
+                                                "대피소는 상시 개발을 준수하고 있는가?",
+                                                style: TextStyle(fontSize: 12),
+                                                maxLines: 2,
+                                              ),
+                                            ),
+                                            Text(userMap["data"][i]["attributes"]["question2"] == "1" ? "✅" : "❌",
+                                                style: TextStyle(fontSize: 20)),
+                                            SizedBox(width: 10)
+                                          ],
+                                        ),
+                                        SizedBox(height: 10)
+                                      ],
+                                    ),
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text("[3번째 질문]"),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            SizedBox(
+                                              width: 240,
+                                              child: Text(
+                                                "용도에 맟게 사용되고 있는가?",
+                                                style: TextStyle(fontSize: 12),
+                                                maxLines: 2,
+                                              ),
+                                            ),
+                                            Text(userMap["data"][i]["attributes"]["question3"] == "1" ?  "✅" : "❌",
+                                                style: TextStyle(fontSize: 20)),
+                                            SizedBox(width: 10)
+                                          ],
+                                        ),
+                                        SizedBox(height: 10)
+                                      ],
+                                    ),
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text("[4번째 질문]"),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            SizedBox(
+                                              width: 240,
+                                              child: Text(
+                                                "건물 관리자는 대피소의 정확한 위치를 알고 있는가?",
+                                                style: TextStyle(fontSize: 12),
+                                                maxLines: 2,
+                                              ),
+                                            ),
+                                            Text(userMap["data"][i]["attributes"]["question4"] == "1" ? "✅" : "❌",
+                                                style: TextStyle(fontSize: 20)),
+                                            SizedBox(width: 10)
+                                          ],
+                                        ),
+                                        SizedBox(height: 10)
+                                      ],
+                                    ),
+                                  ],
+                                ))
+                          ],
+                        ),
+                        SizedBox(height: 10)
+                      ],
+                    )
+                  ],
+                ),
+              ),
+            )
+          ],
+        ));
+      }
 
       return Column(children: children);
     } catch (error) {

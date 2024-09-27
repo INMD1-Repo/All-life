@@ -20,6 +20,7 @@ class _review_createtate extends State<review_create>
     with WidgetsBindingObserver {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String uuid = "";
+  String place = "";
   double _rating = 0; // 초기 평점
   Map<String, dynamic> userinfo = {
     "login": 0,
@@ -87,6 +88,7 @@ class _review_createtate extends State<review_create>
   void Post_data(Object? extra) {
     var Place_id = jsonDecode(extra!.toString());
     uuid = Place_id["place_id"].toString();
+    place = Place_id["place"].toString();
   }
 
   void answer_send() async {
@@ -98,7 +100,8 @@ class _review_createtate extends State<review_create>
       "rating": _rating,
       "UserID": userinfo["username"],
       "email": userinfo["email"],
-      "place_uuid": uuid
+      "place_uuid": uuid,
+      "place": place
     };
 
     final url = Uri.parse('https://hackton.powerinmd.com/api/quest-answers');
@@ -108,17 +111,23 @@ class _review_createtate extends State<review_create>
     };
 
     try {
-      // UserID를 조회하는 로직 추가
-      final userIdCheckUrl = Uri.parse('https://hackton.powerinmd.com/api/quest-answers?UserID=${userinfo["username"]}');
+      // UserID를 조회하는 로직
+      final userIdCheckUrl = Uri.parse('https://hackton.powerinmd.com/api/quest-answers?filters[UserID][\$containsi]=${userinfo["username"]}');
       final userIdResponse = await http.get(userIdCheckUrl, headers: headers);
 
       if (userIdResponse.statusCode == 200) {
         final responseData = jsonDecode(userIdResponse.body);
         final existingData = responseData['data'];
 
-        if (existingData.isNotEmpty) {
-          // UserID가 존재하는 경우 PUT 요청
-          final updateUrl = Uri.parse('https://hackton.powerinmd.com/api/quest-answers/${existingData[0]['id']}'); // ID를 사용하여 업데이트
+        // UserID가 존재하는 경우, place_uuid로 필터링
+        final existingEntry = existingData.firstWhere(
+              (entry) => entry['attributes']['place_uuid'] == uuid,
+          orElse: () => null, // 일치하는 항목이 없으면 null 반환
+        );
+
+        if (existingEntry != null) {
+          // UserID와 place_uuid가 모두 존재하는 경우 PUT 요청
+          final updateUrl = Uri.parse('https://hackton.powerinmd.com/api/quest-answers/${existingEntry['id']}');
 
           final updateResponse = await http.put(
             updateUrl,
@@ -133,21 +142,21 @@ class _review_createtate extends State<review_create>
             print(updateResponse.body);
             _showResultErrorDialog(true, "업데이트에 실패했습니다. 다시 시도해주시기 바랍니다.");
           }
-        }
-      } else if (userIdResponse.statusCode == 404) {
-        // UserID가 존재하지 않는 경우 POST 요청
-        final response = await http.post(
-          url,
-          headers: headers,
-          body: jsonEncode({"data": body}),
-        );
-
-        if (response.statusCode == 200) {
-          _showsnackbars(context);
-          context.go("/map");
         } else {
-          print(response.body);
-          _showResultErrorDialog(true, "업로드에 실패했습니다. 다시 시도해주시기 바랍니다.");
+          // 일치하는 place_uuid가 없는 경우 새로운 항목 추가
+          final response = await http.post(
+            url,
+            headers: headers,
+            body: jsonEncode({"data": body}),
+          );
+
+          if (response.statusCode == 200) {
+            _showsnackbars(context);
+            context.go("/map");
+          } else {
+            print(response.body);
+            _showResultErrorDialog(true, "업로드에 실패했습니다. 다시 시도해주시기 바랍니다.");
+          }
         }
       } else {
         // 사용자 조회 실패 처리
@@ -160,6 +169,8 @@ class _review_createtate extends State<review_create>
       _showResultErrorDialog(true, "업로드에 실패했습니다. 다시 시도해주시기 바랍니다.");
     }
   }
+
+
 
 
   @override

@@ -7,6 +7,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:http/http.dart' as http;
 
 class mapPage extends StatefulWidget {
   const mapPage({super.key});
@@ -66,6 +67,8 @@ class _mapPageState extends State<mapPage> with WidgetsBindingObserver {
     "term": "false",
     "type": 2
   };
+  var uuid_rate = {};
+
   NaverMapController? _mapController; // NaverMapController 선언
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -163,17 +166,45 @@ class _mapPageState extends State<mapPage> with WidgetsBindingObserver {
   //-----------데이터 불려오는 함수 끝--------------------------
 
   //-----------마커 이미지 불려오는 함수--------------------------
-  Future<String> selectedImage(rating, type) async {
+  Future<dynamic> getstar(String UUID, {bool returnDouble = false}) async {
+    final Url = Uri.parse('https://hackton.powerinmd.com/api/quest-answers/ratings?place_uuid=' + UUID);
+    final headers = {
+      "Content-Type": "application/json",
+      "Authorization":
+      "Bearer 00587b42c3284bf6137d9a0795d81e292f56d3cec953be9828cf25181ba9ef9e70ef3a2dd54526098592479f65e0436c009bd6739be705d40b9a69b5727c052aa462560bedca8c0341841427b1fd382c219cdf0ef9b61f01c2b18445f5a2151ae6e542b80c10cd3c0467daa404e4dfae159bbc40f2f2c8703d2654841fb149cf"
+    };
+
+    final userIdResponse = await http.get(Url, headers: headers);
+
+    // 응답 본문이 정상적으로 반환된 경우
+    if (userIdResponse.statusCode == 200) {
+      final data = json.decode(userIdResponse.body);
+      double rating = (data['total_rating'] ?? 0).toDouble(); // 데이터가 없으면 0으로 처리
+
+      // 반환 타입 결정
+      return returnDouble ? rating : rating.toInt();
+    } else {
+      // 오류 발생 시 0 반환
+      return returnDouble ? 0.0 : 0; // 오류 발생 시에도 타입에 맞춰 0 반환
+    }
+  }
+
+
+  Future<String> selectedImage(String UUID, String type) async {
+    // getstar 함수에서 비동기 호출 시 await 사용
+    int rating = await getstar(UUID);
+    print(rating);
+
     String basePath = type == "earthquake"
         ? "assets/mapicon/earthquake"
         : "assets/mapicon/tsunami";
     if (rating == 0) {
       return basePath + "0.png";
-    } else if (rating < 1) {
+    } else if (rating <= 1) {
       return basePath + "1.png";
-    } else if (rating > 2 && rating < 3) {
+    } else if (rating >= 2 && rating <= 3) {
       return basePath + "2.png";
-    } else if (rating < 4) {
+    } else if (rating == 4 || rating == 5) {
       return basePath + "4.png";
     } else {
       return basePath + "0.png";
@@ -254,7 +285,8 @@ class _mapPageState extends State<mapPage> with WidgetsBindingObserver {
                               var count = 1;
                               for (var item in markerData) {
                                 String iconPath = await selectedImage(
-                                    item["attributes"]['rating'], "earthquake");
+                                    item["attributes"]['place_id'],
+                                    "earthquake");
                                 count++;
                                 NLatLng position = NLatLng(
                                   double.parse(item["attributes"]['ycord']),
@@ -278,7 +310,7 @@ class _mapPageState extends State<mapPage> with WidgetsBindingObserver {
                               List<dynamic> tsunamid = jsonDecode(tsunami!);
                               for (var item in tsunamid) {
                                 String iconPath = await selectedImage(
-                                    item["attributes"]['rating'], "tsunami");
+                                    item["attributes"]['place_id'], "tsunami");
                                 count++;
                                 NLatLng position = NLatLng(
                                   double.parse(item["attributes"]['ycord']),
@@ -437,7 +469,18 @@ class _mapPageState extends State<mapPage> with WidgetsBindingObserver {
                                       height:
                                           MediaQuery.of(context).size.height *
                                               0.3,
-                                      child: _build_page(),
+                                      child: FutureBuilder<Widget>(
+                                        future: _build_page(),
+                                        builder: (context, snapshot) {
+                                          if (snapshot.connectionState == ConnectionState.waiting) {
+                                            return Center(child: CircularProgressIndicator());
+                                          } else if (snapshot.hasError) {
+                                            return Center(child: Text('Error: ${snapshot.error}'));
+                                          } else {
+                                            return snapshot.data!; // 데이터가 준비되면 반환된 Widget
+                                          }
+                                        },
+                                      )
                                     ),
                                 ],
                               ),
@@ -727,9 +770,9 @@ class _mapPageState extends State<mapPage> with WidgetsBindingObserver {
     );
   }
 
-  Widget _build_page() {
+  Future<Widget> _build_page() async {
     Map<String, dynamic> userMap = jsonDecode(_page_data);
-    double rating_text = userMap["attributes"]['rating'].toDouble();
+    double rating_text =  await getstar(userMap["attributes"]['place_id'], returnDouble: true);
     String type = "";
     if (userMap["attributes"]['Type'] == "001") {
       type = "지진대피소";
@@ -812,8 +855,7 @@ class _mapPageState extends State<mapPage> with WidgetsBindingObserver {
                                       actions: [
                                         TextButton(
                                             onPressed: () {
-                                              context.go(
-                                                  "/login");
+                                              context.go("/login");
                                             },
                                             child: Text("로그인"))
                                       ],
@@ -824,7 +866,10 @@ class _mapPageState extends State<mapPage> with WidgetsBindingObserver {
                                 print("/community/review_create?place_id=" +
                                     jsonEncode(userMap["attributes"]));
                                 context.go("/community/review_create",
-                                    extra: jsonEncode({"place_id": userMap["attributes"]['place_id']}));
+                                    extra: jsonEncode({
+                                      "place_id": userMap["attributes"]['place_id'],
+                                      "place": userMap["attributes"]['vt_acmdfclty_nm'],
+                                    }));
                               }
                             },
                             child: const Text(
