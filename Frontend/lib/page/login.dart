@@ -2,8 +2,11 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
 class loguin extends StatefulWidget {
   const loguin({super.key});
@@ -13,6 +16,9 @@ class loguin extends StatefulWidget {
 }
 
 class _loguinState extends State<loguin> with WidgetsBindingObserver {
+  String id = "";
+  String password = "";
+
   Map<String, dynamic> userinfo = {
     "login": 0,
     "token": "",
@@ -27,7 +33,6 @@ class _loguinState extends State<loguin> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    _loadLocation();
     WidgetsBinding.instance.addObserver(this);
   }
 
@@ -42,16 +47,50 @@ class _loguinState extends State<loguin> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     super.didChangeAppLifecycleState(state);
     if (state == AppLifecycleState.resumed) {
-      _loadLocation();
     }
   }
 
-  Future<void> _loadLocation() async {
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    String userinfo_sp = sp.getString("loginInfo")!;
-    userinfo = jsonDecode(userinfo_sp);
-    print(userinfo_sp);
+  Future<void> _Sinup_in_SharedPreferences() async {
+   String bodys = "{\"user_id\":\"$id\",\"password\":\"$password\"}";
+   final url = Uri.parse('http://www.ready-order.shop:334/user/signin');
+   final headers = {"Content-Type": "application/json"};
+   try {
+     final response = await http.post(
+       url,
+       headers: headers,
+       body: bodys,
+     );
+
+     if (response.statusCode == 201) {
+       Map<String, dynamic> data = jsonDecode(response.body);
+       Map<String, dynamic> decodedToken = JwtDecoder.decode(data["accessToken"]);
+       userinfo =  {
+         "login": 1,
+         "token": data["accessToken"],
+         "refreshtoken": "",
+         "userimage": "assets/default_avatar.jpg",
+         "username": decodedToken["username"],
+         "email": decodedToken["email"],
+         "term": decodedToken["term"],
+         "type": decodedToken["type"],
+         "language": decodedToken["language"],
+         "location": decodedToken["location"]
+       };
+       print(userinfo);
+       SharedPreferences sp = await SharedPreferences.getInstance();
+       sp.setString("loginInfo", jsonEncode(userinfo));
+       context.go("/");
+     } else {
+       // 요청 실패 처리
+       _showBackDialog(true, "로그인에 실패했습니다. 다시 시도해주시기 바람니다.");
+     }
+   } catch (e) {
+     // 에러 처리
+     print(e);
+     _showBackDialog(true, "로그인에 실패했습니다. 다시 시도해주시기 바람니다.");
+   }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -98,15 +137,19 @@ class _loguinState extends State<loguin> with WidgetsBindingObserver {
                           TextField(
                             decoration: InputDecoration(
                               border: OutlineInputBorder(),
-                              labelText: 'E-Mail',
-                            ),
+                              labelText: 'ID',
+                            ),onChanged: (text) => {
+                              id = text
+                          },
                           ),
                           SizedBox(height: 30),
                           TextField(
                             decoration: InputDecoration(
                               border: OutlineInputBorder(),
-                              labelText: 'Password',
-                            ),
+                              labelText: '패스워드(Password)',
+                            ),onChanged: (text) => {
+                            password = text
+                          },
                           ),
                           SizedBox(height: 20),
                         ],
@@ -120,9 +163,9 @@ class _loguinState extends State<loguin> with WidgetsBindingObserver {
                     children: [
                       ElevatedButton(
                         onPressed: () {
-                          // Add log in functionality
+                          _Sinup_in_SharedPreferences();
                         },
-                        child: Text("Sign In"),
+                        child: Text("Sign In(로그인)"),
                         style: ElevatedButton.styleFrom(
                           minimumSize: Size(double.infinity, 60),
                           backgroundColor: Colors.blue,
@@ -135,7 +178,7 @@ class _loguinState extends State<loguin> with WidgetsBindingObserver {
                           // Add sign-up navigation
                           context.go("/signup");
                         },
-                        child: Text("Create Account"),
+                        child: Text("Create Account(회원가입)"),
                         style: ElevatedButton.styleFrom(
                           minimumSize: Size(double.infinity, 60),
                           backgroundColor: Colors.white,
@@ -150,6 +193,32 @@ class _loguinState extends State<loguin> with WidgetsBindingObserver {
           ),
         ),
       ),
+    );
+  }
+  Future<bool?> _showBackDialog(type, String message) {
+    return showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        if (type) {
+          return AlertDialog(
+            title: const Text('오류!'),
+            content: Text(message),
+            actions: <Widget>[
+              TextButton(
+                style: TextButton.styleFrom(
+                  textStyle: Theme.of(context).textTheme.labelLarge,
+                ),
+                child: const Text('확인'),
+                onPressed: () {
+                  Navigator.pop(context, true); // 다이얼로그 닫기
+                },
+              ),
+            ],
+          );
+        } else {
+          return Container();
+        }
+      },
     );
   }
 }

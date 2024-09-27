@@ -372,7 +372,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        _buildButton(0, Icons.home, "홈", true, '/useraccount'),
+                        _buildButton(0, Icons.home, "홈", true, '/login'),
                         _buildButton(1, Icons.place, "지도 보기", false, '/map'),
                         _buildButton(2, Icons.diversity_3, "커뮤니티", false,
                             '/community/reivew'),
