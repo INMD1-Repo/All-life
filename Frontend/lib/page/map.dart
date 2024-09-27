@@ -6,6 +6,7 @@ import 'package:flutter_naver_map/flutter_naver_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class mapPage extends StatefulWidget {
   const mapPage({super.key});
@@ -53,6 +54,7 @@ class StarRating extends StatelessWidget {
 class _mapPageState extends State<mapPage> with WidgetsBindingObserver {
   String? earthquake;
   String? tsunami;
+  String? info = "https://hackton-ar.powerinmd.com/?city=%EB%B6%80%EC%82%B0%EC%A7%84%EA%B5%AC&dong=%EA%B0%80%EC%95%BC%EB%8F%99";
   Map<String, dynamic> userinfo = {
     "login": 0,
     "token": "",
@@ -69,16 +71,6 @@ class _mapPageState extends State<mapPage> with WidgetsBindingObserver {
 
   bool _showContainer = false; // 조건을 저장하는 변수
 
-  static const platform = MethodChannel('com.deu.hackton.all_life/native');
-
-  //AR코어 실행기 위한 함수
-  Future<void> _startFragmentActivity() async {
-    try {
-      await platform.invokeMethod('startFragmentActivity');
-    } on PlatformException catch (e) {
-      print("Fragment Activity를 시작하는 중 오류 발생: ${e.message}");
-    }
-  }
 
   //유동성을 위한 함수
   void _toggleContainer(allw) {
@@ -118,6 +110,12 @@ class _mapPageState extends State<mapPage> with WidgetsBindingObserver {
     String userinfo_sp = sp.getString("loginInfo")!;
     userinfo = jsonDecode(userinfo_sp);
     print(userinfo_sp);
+    String? data = await sp.getString("locationjson");
+    String city = jsonDecode(data!)["results"][0]["region"]["area2"]["name"].toString();
+    String dong = jsonDecode(data!)["results"][0]["region"]["area3"]["name"].toString();
+    setState(() {
+      info = "https://hackton-ar.powerinmd.com/?city=$city&dong=$dong";
+    });
   }
 
   //GPS관련 세팅
@@ -350,7 +348,7 @@ class _mapPageState extends State<mapPage> with WidgetsBindingObserver {
                                               child: InkWell(
                                                 splashColor: Colors.green,
                                                 onTap: () {
-                                                  _startFragmentActivity();
+                                                  launchUrl(Uri.parse(info!));
                                                 },
                                                 child: Column(
                                                   mainAxisAlignment:
